@@ -1,0 +1,11 @@
+# Cloudflare Pages Build Configuration
+# Framework: Flutter
+# Documentation: https://developers.cloudflare.com/pages/framework-guides/deploy-a-flutter-site/
+
+build:
+  command: flutter build web --release
+  output: build/web
+  
+# Environment variables (if needed)
+# environment:
+#   FLUTTER_VERSION: "3.x"
