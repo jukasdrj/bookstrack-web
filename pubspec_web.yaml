@@ -1,0 +1,27 @@
+name: books_tracker
+description: A cross-platform book tracking app with AI-powered bookshelf scanning
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.2.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Firebase (web compatible)
+  firebase_core: ^2.24.2
+  firebase_auth: ^4.15.3
+  firebase_analytics: ^10.7.0
+
+  # Material Design
+  material_color_utilities: ^0.11.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
