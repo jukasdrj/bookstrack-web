@@ -1,0 +1,50 @@
+{
+  // NOTE: This file is for reference only
+  // VS Code is not used in this project - Claude Code CLI workflow only
+  // Settings preserved for documentation purposes
+
+  // Auto-format on save (if VS Code is ever used)
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "explicit",
+    "source.organizeImports": "explicit"
+  },
+
+  // Dart/Flutter settings
+  "dart.lineLength": 80,
+  "dart.showTodos": true,
+  "dart.debugExternalPackageLibraries": false,
+  "dart.debugSdkLibraries": false,
+
+  // Editor helpers
+  "[dart]": {
+    "editor.rulers": [80],
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true,
+    "editor.detectIndentation": false,
+    "editor.suggestSelection": "first",
+    "editor.wordBasedSuggestions": "off"
+  },
+
+  // Show analyzer hints in real-time
+  "dart.analysisServerFoldingRanges": true,
+  "dart.showInspectorNotificationsForWidgetErrors": true,
+
+  // Files to ignore in search/explorer (keeps workspace clean)
+  "files.exclude": {
+    "**/.dart_tool": true,
+    "**/.idea": true,
+    "**/build": true,
+    "**/*.g.dart": true,
+    "**/*.freezed.dart": true
+  },
+
+  // Search exclusions (faster searches)
+  "search.exclude": {
+    "**/.dart_tool": true,
+    "**/build": true,
+    "**/*.g.dart": true,
+    "**/*.freezed.dart": true,
+    "**/pubspec.lock": true
+  }
+}

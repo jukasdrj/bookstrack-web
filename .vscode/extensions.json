@@ -1,0 +1,9 @@
+{
+  // Recommended VS Code extensions for Flutter development
+  "recommendations": [
+    "dart-code.dart-code",
+    "dart-code.flutter",
+    "usernamehw.errorlens",
+    "streetsidesoftware.code-spell-checker"
+  ]
+}

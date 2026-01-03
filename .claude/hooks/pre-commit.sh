@@ -47,22 +47,34 @@ if command -v flutter &> /dev/null; then
   fi
 fi
 
-# 3. Dart analyzer (if Flutter available)
+# 3. Format Dart code (auto-fix)
+if command -v dart &> /dev/null; then
+  echo "✨ Formatting Dart code..."
+  STAGED_DART=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.dart$' || true)
+
+  if [ -n "$STAGED_DART" ]; then
+    dart format . > /dev/null 2>&1
+    echo -e "${GREEN}✓ Code formatted${NC}"
+  fi
+fi
+
+# 4. Dart analyzer (if Flutter available)
 if command -v flutter &> /dev/null; then
   echo "🎯 Running Dart analyzer..."
   STAGED_DART=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.dart$' || true)
 
   if [ -n "$STAGED_DART" ]; then
-    if ! flutter analyze --no-pub 2>&1 | grep -q "No issues found"; then
+    if ! flutter analyze --no-fatal-infos 2>&1 | tail -1 | grep -q "No issues found"; then
       echo -e "${YELLOW}⚠ Warning: Dart analyzer found issues${NC}"
       echo "  Run: flutter analyze"
+      echo "  This is a warning - commit will proceed"
     else
       echo -e "${GREEN}✓ Dart analyzer passed${NC}"
     fi
   fi
 fi
 
-# 4. Check for debug print statements
+# 5. Check for debug print statements
 echo "🐛 Checking for debug statements..."
 DEBUG_COUNT=$(git diff --cached | grep -c "print(" || true)
 
@@ -71,7 +83,7 @@ if [ $DEBUG_COUNT -gt 0 ]; then
   echo "  Consider using debugPrint() or proper logging"
 fi
 
-# 5. Check pubspec.yaml changes
+# 6. Check pubspec.yaml changes
 if git diff --cached --name-only | grep -q "pubspec.yaml"; then
   echo "📦 Checking pubspec.yaml..."
 
