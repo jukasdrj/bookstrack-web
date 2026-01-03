@@ -134,11 +134,14 @@ npx wrangler pages deploy . --project-name=bookstrack-web \
 
 ## Future Enhancements
 
-### Phase 1: Add Firebase (Pending)
-- [ ] Configure Firebase project for web
-- [ ] Add Firebase config to Pages environment variables
-- [ ] Update to `lib/main_simple.dart` (includes Firebase)
-- [ ] Test authentication flow
+### Phase 1: Add Firebase Authentication (In Progress)
+- [x] Create Firebase auth UI (`lib/main_auth.dart`)
+- [x] Implement email/password and Google sign-in
+- [x] Add session management and protected routes
+- [x] Create setup documentation (`FIREBASE_SETUP.md`)
+- [ ] ⚠️ Resolve package compatibility issues (firebase_auth_web + Flutter 3.38.5)
+- [ ] Configure real Firebase project
+- [ ] Deploy with Firebase auth enabled
 
 ### Phase 2: Full App Features (Pending)
 - [ ] Fix package compatibility issues (image_cropper, mobile_scanner)
