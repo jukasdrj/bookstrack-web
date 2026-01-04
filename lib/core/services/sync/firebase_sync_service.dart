@@ -51,9 +51,11 @@ class FirebaseSyncService {
         .doc(userId)
         .collection('works')
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => {...doc.data(), 'id': doc.id})
-            .toList(),);
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => {...doc.data(), 'id': doc.id})
+              .toList(),
+        );
   }
 
   /// Delete work from Firestore
@@ -80,9 +82,7 @@ class FirebaseSyncService {
         .collection('works')
         .get();
 
-    return snapshot.docs
-        .map((doc) => {...doc.data(), 'id': doc.id})
-        .toList();
+    return snapshot.docs.map((doc) => {...doc.data(), 'id': doc.id}).toList();
   }
 
   /// Convert Work to Firestore document
@@ -109,14 +109,18 @@ class FirebaseSyncService {
       title: data['title'] as String,
       author: Value(data['author'] as String?),
       subjectTags: Value((data['subjectTags'] as List?)?.cast<String>() ?? []),
-      reviewStatus: Value(ReviewStatus.values[data['reviewStatus'] as int? ?? 0]),
+      reviewStatus:
+          Value(ReviewStatus.values[data['reviewStatus'] as int? ?? 0]),
       synthetic: Value(data['synthetic'] as bool? ?? false),
       primaryProvider: Value(data['primaryProvider'] as String?),
       contributors: Value((data['contributors'] as List?)?.cast<String>()),
-      googleBooksVolumeIDs: Value((data['googleBooksVolumeIDs'] as List?)?.cast<String>()),
+      googleBooksVolumeIDs:
+          Value((data['googleBooksVolumeIDs'] as List?)?.cast<String>()),
       openLibraryWorkID: Value(data['openLibraryWorkID'] as String?),
-      createdAt: Value((data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now()),
-      updatedAt: Value((data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now()),
+      createdAt:
+          Value((data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now()),
+      updatedAt:
+          Value((data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now()),
     );
   }
 }

@@ -101,17 +101,20 @@ class HomePage extends StatelessWidget {
                         const _FeatureItem(
                           icon: Icons.camera_alt,
                           title: 'AI Bookshelf Scanner',
-                          description: 'Scan your entire bookshelf with Gemini 2.0 Flash',
+                          description:
+                              'Scan your entire bookshelf with Gemini 2.0 Flash',
                         ),
                         const _FeatureItem(
                           icon: Icons.search,
                           title: 'Multi-Mode Search',
-                          description: 'Search by title, author, ISBN, or barcode',
+                          description:
+                              'Search by title, author, ISBN, or barcode',
                         ),
                         const _FeatureItem(
                           icon: Icons.analytics,
                           title: 'Reading Analytics',
-                          description: 'Track your reading habits and diversity insights',
+                          description:
+                              'Track your reading habits and diversity insights',
                         ),
                         const _FeatureItem(
                           icon: Icons.cloud_sync,

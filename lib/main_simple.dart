@@ -12,7 +12,8 @@ void main() async {
         authDomain: String.fromEnvironment('FIREBASE_AUTH_DOMAIN'),
         projectId: String.fromEnvironment('FIREBASE_PROJECT_ID'),
         storageBucket: String.fromEnvironment('FIREBASE_STORAGE_BUCKET'),
-        messagingSenderId: String.fromEnvironment('FIREBASE_MESSAGING_SENDER_ID'),
+        messagingSenderId:
+            String.fromEnvironment('FIREBASE_MESSAGING_SENDER_ID'),
         appId: String.fromEnvironment('FIREBASE_APP_ID'),
         measurementId: String.fromEnvironment('FIREBASE_MEASUREMENT_ID'),
       ),
@@ -118,7 +119,8 @@ class HomePage extends StatelessWidget {
                     const _FeatureItem(
                       icon: Icons.camera_alt,
                       title: 'AI Bookshelf Scanner',
-                      description: 'Scan your entire bookshelf with Gemini 2.0 Flash',
+                      description:
+                          'Scan your entire bookshelf with Gemini 2.0 Flash',
                     ),
                     const _FeatureItem(
                       icon: Icons.search,
@@ -128,7 +130,8 @@ class HomePage extends StatelessWidget {
                     const _FeatureItem(
                       icon: Icons.analytics,
                       title: 'Reading Analytics',
-                      description: 'Track your reading habits and diversity insights',
+                      description:
+                          'Track your reading habits and diversity insights',
                     ),
                   ],
                 ),

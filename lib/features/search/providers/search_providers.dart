@@ -128,7 +128,8 @@ class Search extends _$Search {
       state = SearchState.empty(
         query: query,
         scope: SearchScope.author,
-        message: 'No books found by author "$query". Check the spelling or try a different author.',
+        message:
+            'No books found by author "$query". Check the spelling or try a different author.',
       );
     } else {
       final data = response.data!;
@@ -163,7 +164,8 @@ class Search extends _$Search {
       state = SearchState.empty(
         query: query,
         scope: SearchScope.isbn,
-        message: 'No book found with ISBN "$query". Please check the ISBN and try again.',
+        message:
+            'No book found with ISBN "$query". Please check the ISBN and try again.',
       );
     } else {
       final data = response.data!;
@@ -210,9 +212,9 @@ SearchState searchWithQuery(SearchWithQueryRef ref) {
       Future.delayed(const Duration(milliseconds: 300), () {
         if (ref.read(searchQueryProvider) == next) {
           ref.read(searchProvider.notifier).search(
-            query: next,
-            scope: ref.read(searchScopeNotifierProvider),
-          );
+                query: next,
+                scope: ref.read(searchScopeNotifierProvider),
+              );
         }
       });
     }

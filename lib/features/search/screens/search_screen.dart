@@ -79,10 +79,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                           label: Text(_getScopeLabel(scope)),
                           selected: isSelected,
                           onSelected: (_) => _onScopeSelected(scope),
-                          avatar: !isSelected ? Icon(
-                            _getScopeIcon(scope),
-                            size: 18,
-                          ) : null,
+                          avatar: !isSelected
+                              ? Icon(
+                                  _getScopeIcon(scope),
+                                  size: 18,
+                                )
+                              : null,
                         ),
                       );
                     }).toList(),
@@ -107,9 +109,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       initial: () => _buildInitialState(),
       loading: (query, scope) => _buildLoadingState(query, scope),
       results: (query, scope, works, editions, authors, cached, totalResults) =>
-          _buildResultsState(query, scope, works, editions, authors, cached, totalResults),
+          _buildResultsState(
+              query, scope, works, editions, authors, cached, totalResults),
       empty: (query, scope, message) => _buildEmptyState(query, scope, message),
-      error: (query, scope, message, errorCode) => _buildErrorState(query, scope, message),
+      error: (query, scope, message, errorCode) =>
+          _buildErrorState(query, scope, message),
     );
   }
 
@@ -214,13 +218,14 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
               // Find corresponding edition and authors for this work
               final edition = editions.cast().firstWhere(
-                (e) => e.workId == work.id,
-                orElse: () => null,
-              );
+                    (e) => e.workId == work.id,
+                    orElse: () => null,
+                  );
 
-              final workAuthors = authors.cast().where((a) =>
-                work.authorIds?.contains(a.id) ?? false
-              ).toList();
+              final workAuthors = authors
+                  .cast()
+                  .where((a) => work.authorIds?.contains(a.id) ?? false)
+                  .toList();
 
               return BookSearchResultCard(
                 work: work,

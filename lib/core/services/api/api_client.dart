@@ -55,7 +55,8 @@ class _LoggingInterceptor extends Interceptor {
     if (kDebugMode) {
       debugPrint('❌ ERROR: ${err.type} ${err.message}');
       if (err.response != null) {
-        debugPrint('📥 RESPONSE: ${err.response?.statusCode} ${err.response?.data}');
+        debugPrint(
+            '📥 RESPONSE: ${err.response?.statusCode} ${err.response?.data}');
       }
     }
     super.onError(err, handler);

@@ -41,7 +41,8 @@ class LibrarySortOption extends _$LibrarySortOption {
 
 /// Watch library works with filtering and sorting
 @riverpod
-Stream<List<WorkWithLibraryStatus>> watchLibraryWorks(WatchLibraryWorksRef ref) {
+Stream<List<WorkWithLibraryStatus>> watchLibraryWorks(
+    WatchLibraryWorksRef ref) {
   final database = ref.watch(databaseProvider);
   final filter = ref.watch(libraryFilterProvider);
   final sortBy = ref.watch(librarySortOptionProvider);

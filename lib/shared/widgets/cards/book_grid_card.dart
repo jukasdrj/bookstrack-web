@@ -90,14 +90,15 @@ class BookGridCard extends StatelessWidget {
           ? CachedNetworkImage(
               imageUrl: coverUrl,
               fit: BoxFit.cover,
-              memCacheWidth: 600,  // Adaptive for grid (larger)
+              memCacheWidth: 600, // Adaptive for grid (larger)
               placeholder: (context, url) => Container(
                 color: colorScheme.surfaceContainerHighest,
                 child: Center(
                   child: CircularProgressIndicator(strokeWidth: 2),
                 ),
               ),
-              errorWidget: (context, url, error) => _buildPlaceholder(colorScheme),
+              errorWidget: (context, url, error) =>
+                  _buildPlaceholder(colorScheme),
             )
           : _buildPlaceholder(colorScheme),
     );

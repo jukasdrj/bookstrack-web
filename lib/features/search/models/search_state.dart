@@ -5,12 +5,7 @@ import '../../../core/data/models/dtos/author_dto.dart';
 
 part 'search_state.freezed.dart';
 
-enum SearchScope {
-  title,
-  author,
-  isbn,
-  advanced
-}
+enum SearchScope { title, author, isbn, advanced }
 
 @freezed
 class SearchState with _$SearchState {
@@ -52,18 +47,18 @@ extension SearchStateExtensions on SearchState {
   bool get hasError => this is SearchStateError;
 
   String get currentQuery => when(
-    initial: () => '',
-    loading: (query, _) => query,
-    results: (query, _, __, ___, ____, _____, ______) => query,
-    empty: (query, _, __) => query,
-    error: (query, _, __, ___) => query,
-  );
+        initial: () => '',
+        loading: (query, _) => query,
+        results: (query, _, __, ___, ____, _____, ______) => query,
+        empty: (query, _, __) => query,
+        error: (query, _, __, ___) => query,
+      );
 
   SearchScope get currentScope => when(
-    initial: () => SearchScope.title,
-    loading: (_, scope) => scope,
-    results: (_, scope, __, ___, ____, _____, ______) => scope,
-    empty: (_, scope, __) => scope,
-    error: (_, scope, __, ___) => scope,
-  );
+        initial: () => SearchScope.title,
+        loading: (_, scope) => scope,
+        results: (_, scope, __, ___, ____, _____, ______) => scope,
+        empty: (_, scope, __) => scope,
+        error: (_, scope, __, ___) => scope,
+      );
 }

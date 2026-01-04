@@ -50,9 +50,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
             return _buildEmptyState();
           }
 
-          return _isGridView
-              ? _buildGridView(books)
-              : _buildListView(books);
+          return _isGridView ? _buildGridView(books) : _buildListView(books);
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(
@@ -89,9 +87,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
       child: Row(
         children: [
           Icon(
-            currentSort == value
-                ? Icons.check_circle
-                : Icons.circle_outlined,
+            currentSort == value ? Icons.check_circle : Icons.circle_outlined,
             size: 20,
           ),
           const SizedBox(width: 8),
@@ -271,5 +267,4 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
       ),
     );
   }
-
 }

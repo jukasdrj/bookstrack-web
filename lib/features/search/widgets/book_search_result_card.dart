@@ -79,7 +79,8 @@ class BookSearchResultCard extends StatelessWidget {
                                 color: colorScheme.onSurfaceVariant,
                               ),
                             ),
-                          if (edition!.publishedYear != null && edition!.publisher != null)
+                          if (edition!.publishedYear != null &&
+                              edition!.publisher != null)
                             Text(' • ', style: theme.textTheme.bodySmall),
                           if (edition!.publisher != null)
                             Expanded(
@@ -163,7 +164,8 @@ class BookSearchResultCard extends StatelessWidget {
                   ),
                 ),
               ),
-              errorWidget: (context, url, error) => _buildPlaceholder(colorScheme),
+              errorWidget: (context, url, error) =>
+                  _buildPlaceholder(colorScheme),
             )
           : _buildPlaceholder(colorScheme),
     );

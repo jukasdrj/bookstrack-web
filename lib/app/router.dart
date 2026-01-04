@@ -14,51 +14,51 @@ part 'router.g.dart';
 @riverpod
 GoRouter router(RouterRef ref) {
   return GoRouter(
-  initialLocation: '/library',
-  routes: [
-    StatefulShellRoute.indexedStack(
-      builder: (context, state, navigationShell) {
-        return MainScaffold(navigationShell: navigationShell);
-      },
-      branches: [
-        // Library Tab
-        StatefulShellBranch(
-          routes: [
-            GoRoute(
-              path: '/library',
-              builder: (context, state) => const LibraryScreen(),
-            ),
-          ],
-        ),
-        // Search Tab
-        StatefulShellBranch(
-          routes: [
-            GoRoute(
-              path: '/search',
-              builder: (context, state) => const SearchScreen(),
-            ),
-          ],
-        ),
-        // Scanner Tab
-        StatefulShellBranch(
-          routes: [
-            GoRoute(
-              path: '/scanner',
-              builder: (context, state) => const ScannerScreen(),
-            ),
-          ],
-        ),
-        // Insights Tab
-        StatefulShellBranch(
-          routes: [
-            GoRoute(
-              path: '/insights',
-              builder: (context, state) => const InsightsScreen(),
-            ),
-          ],
-        ),
-      ],
-    ),
-  ],
+    initialLocation: '/library',
+    routes: [
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) {
+          return MainScaffold(navigationShell: navigationShell);
+        },
+        branches: [
+          // Library Tab
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/library',
+                builder: (context, state) => const LibraryScreen(),
+              ),
+            ],
+          ),
+          // Search Tab
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/search',
+                builder: (context, state) => const SearchScreen(),
+              ),
+            ],
+          ),
+          // Scanner Tab
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/scanner',
+                builder: (context, state) => const ScannerScreen(),
+              ),
+            ],
+          ),
+          // Insights Tab
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/insights',
+                builder: (context, state) => const InsightsScreen(),
+              ),
+            ],
+          ),
+        ],
+      ),
+    ],
   );
 }

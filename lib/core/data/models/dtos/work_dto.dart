@@ -17,5 +17,6 @@ class WorkDTO with _$WorkDTO {
     DateTime? updatedAt,
   }) = _WorkDTO;
 
-  factory WorkDTO.fromJson(Map<String, dynamic> json) => _$WorkDTOFromJson(json);
+  factory WorkDTO.fromJson(Map<String, dynamic> json) =>
+      _$WorkDTOFromJson(json);
 }

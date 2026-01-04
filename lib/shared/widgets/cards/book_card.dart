@@ -100,7 +100,7 @@ class BookCard extends StatelessWidget {
               child: CachedNetworkImage(
                 imageUrl: coverUrl,
                 fit: BoxFit.cover,
-                memCacheWidth: 240,  // 80 * 3 (for 3x displays)
+                memCacheWidth: 240, // 80 * 3 (for 3x displays)
                 memCacheHeight: 360, // 120 * 3
                 placeholder: (context, url) => Container(
                   color: colorScheme.surfaceContainerHighest,
@@ -108,7 +108,8 @@ class BookCard extends StatelessWidget {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   ),
                 ),
-                errorWidget: (context, url, error) => _buildPlaceholder(colorScheme),
+                errorWidget: (context, url, error) =>
+                    _buildPlaceholder(colorScheme),
               ),
             )
           : _buildPlaceholder(colorScheme),
@@ -216,7 +217,8 @@ class BookCard extends StatelessWidget {
     );
   }
 
-  ({Color color, IconData icon, String label}) _getStatusConfig(ReadingStatus status) {
+  ({Color color, IconData icon, String label}) _getStatusConfig(
+      ReadingStatus status) {
     return switch (status) {
       ReadingStatus.wishlist => (
           color: Colors.purple,

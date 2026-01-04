@@ -26,7 +26,8 @@ class DTOMapper {
 
     // Validate work/edition count match
     if (data.works.length != data.editions.length) {
-      debugPrint('⚠️ Warning: Works count (${data.works.length}) != Editions count (${data.editions.length}). Using index-based mapping may cause mismatches.');
+      debugPrint(
+          '⚠️ Warning: Works count (${data.works.length}) != Editions count (${data.editions.length}). Using index-based mapping may cause mismatches.');
     }
 
     // Process each work
@@ -35,13 +36,13 @@ class DTOMapper {
       final editionDTO = i < data.editions.length ? data.editions[i] : null;
 
       // Map authors using authorIds from WorkDTO (backend provides correct relationships)
-      final authorDTOs = data.authors
-          .where((a) => workDTO.authorIds.contains(a.id))
-          .toList();
+      final authorDTOs =
+          data.authors.where((a) => workDTO.authorIds.contains(a.id)).toList();
 
       // Warn if no authors found for this work
       if (authorDTOs.isEmpty && workDTO.authorIds.isNotEmpty) {
-        debugPrint('⚠️ Warning: Work "${workDTO.title}" has ${workDTO.authorIds.length} author IDs but no matching authors in response');
+        debugPrint(
+            '⚠️ Warning: Work "${workDTO.title}" has ${workDTO.authorIds.length} author IDs but no matching authors in response');
       }
 
       // Check for duplicates (synthetic works with same ISBN)
@@ -54,8 +55,10 @@ class DTOMapper {
       }
 
       // Map DTOs to database models
-      final workCompanion = _mapWorkDTOToCompanion(workDTO, editionDTO, authorDTOs);
-      final authorCompanions = authorDTOs.map(_mapAuthorDTOToCompanion).toList();
+      final workCompanion =
+          _mapWorkDTOToCompanion(workDTO, editionDTO, authorDTOs);
+      final authorCompanions =
+          authorDTOs.map(_mapAuthorDTOToCompanion).toList();
 
       // Insert into database
       await database.insertWorkWithAuthors(workCompanion, authorCompanions);
@@ -71,8 +74,8 @@ class DTOMapper {
 
       // Fetch the inserted work
       final insertedWork = await (database.select(database.works)
-        ..where((t) => t.id.equals(workCompanion.id.value)))
-        .getSingle();
+            ..where((t) => t.id.equals(workCompanion.id.value)))
+          .getSingle();
       insertedWorks.add(insertedWork);
     }
 
@@ -89,7 +92,7 @@ class DTOMapper {
     final authorNames = authors.map((a) => a.name).join(', ');
 
     return WorksCompanion.insert(
-      id: dto.id,  // Use API-provided ID instead of generating UUID
+      id: dto.id, // Use API-provided ID instead of generating UUID
       title: dto.title,
       author: Value(authorNames.isNotEmpty ? authorNames : null),
       subjectTags: Value(dto.subjectTags),
@@ -131,7 +134,7 @@ class DTOMapper {
   /// Map AuthorDTO to AuthorsCompanion
   static AuthorsCompanion _mapAuthorDTOToCompanion(AuthorDTO dto) {
     return AuthorsCompanion.insert(
-      id: dto.id,  // Use backend-provided ID (not UUID)
+      id: dto.id, // Use backend-provided ID (not UUID)
       name: dto.name,
       gender: Value(_parseGender(dto.gender)),
       culturalRegion: Value(_parseCulturalRegion(dto.culturalRegion)),
@@ -142,18 +145,19 @@ class DTOMapper {
   }
 
   /// Find work by ISBN (for deduplication)
-  static Future<Work?> _findWorkByISBN(String isbn, AppDatabase database) async {
+  static Future<Work?> _findWorkByISBN(
+      String isbn, AppDatabase database) async {
     // Find edition with this ISBN
     final edition = await (database.select(database.editions)
-      ..where((t) => t.isbn.equals(isbn)))
-      .getSingleOrNull();
+          ..where((t) => t.isbn.equals(isbn)))
+        .getSingleOrNull();
 
     if (edition == null) return null;
 
     // Get the work for this edition
     return await (database.select(database.works)
-      ..where((t) => t.id.equals(edition.workId)))
-      .getSingleOrNull();
+          ..where((t) => t.id.equals(edition.workId)))
+        .getSingleOrNull();
   }
 
   /// Parse edition format string to enum

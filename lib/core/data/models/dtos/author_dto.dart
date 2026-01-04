@@ -19,5 +19,6 @@ class AuthorDTO with _$AuthorDTO {
     DateTime? updatedAt,
   }) = _AuthorDTO;
 
-  factory AuthorDTO.fromJson(Map<String, dynamic> json) => _$AuthorDTOFromJson(json);
+  factory AuthorDTO.fromJson(Map<String, dynamic> json) =>
+      _$AuthorDTOFromJson(json);
 }

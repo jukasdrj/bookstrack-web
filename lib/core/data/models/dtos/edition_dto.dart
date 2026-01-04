@@ -21,5 +21,6 @@ class EditionDTO with _$EditionDTO {
     DateTime? updatedAt,
   }) = _EditionDTO;
 
-  factory EditionDTO.fromJson(Map<String, dynamic> json) => _$EditionDTOFromJson(json);
+  factory EditionDTO.fromJson(Map<String, dynamic> json) =>
+      _$EditionDTOFromJson(json);
 }
