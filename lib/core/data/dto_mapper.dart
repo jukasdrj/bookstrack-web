@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 import '../database/database.dart';
 import '../models/dtos/work_dto.dart';
@@ -25,7 +26,7 @@ class DTOMapper {
 
     // Validate work/edition count match
     if (data.works.length != data.editions.length) {
-      print('⚠️ Warning: Works count (${data.works.length}) != Editions count (${data.editions.length}). Using index-based mapping may cause mismatches.');
+      debugPrint('⚠️ Warning: Works count (${data.works.length}) != Editions count (${data.editions.length}). Using index-based mapping may cause mismatches.');
     }
 
     // Process each work
@@ -40,7 +41,7 @@ class DTOMapper {
 
       // Warn if no authors found for this work
       if (authorDTOs.isEmpty && workDTO.authorIds.isNotEmpty) {
-        print('⚠️ Warning: Work "${workDTO.title}" has ${workDTO.authorIds.length} author IDs but no matching authors in response');
+        debugPrint('⚠️ Warning: Work "${workDTO.title}" has ${workDTO.authorIds.length} author IDs but no matching authors in response');
       }
 
       // Check for duplicates (synthetic works with same ISBN)
