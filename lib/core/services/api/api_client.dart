@@ -6,9 +6,10 @@ class ApiClient {
   static Dio create() {
     final dio = Dio(
       BaseOptions(
-        baseUrl: 'https://api.oooefam.net',  // Production BooksTrack API
+        baseUrl: 'https://api.oooefam.net', // Production BooksTrack API
         connectTimeout: const Duration(seconds: 10),
-        receiveTimeout: const Duration(seconds: 60),  // Allow for AI processing (25-40s)
+        receiveTimeout:
+            const Duration(seconds: 60), // Allow for AI processing (25-40s)
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -32,9 +33,9 @@ class _LoggingInterceptor extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     if (kDebugMode) {
-      print('🌐 REQUEST: ${options.method} ${options.uri}');
+      debugPrint('🌐 REQUEST: ${options.method} ${options.uri}');
       if (options.data != null) {
-        print('📤 DATA: ${options.data}');
+        debugPrint('📤 DATA: ${options.data}');
       }
     }
     super.onRequest(options, handler);
@@ -43,7 +44,8 @@ class _LoggingInterceptor extends Interceptor {
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
     if (kDebugMode) {
-      print('✅ RESPONSE: ${response.statusCode} ${response.requestOptions.uri}');
+      debugPrint(
+          '✅ RESPONSE: ${response.statusCode} ${response.requestOptions.uri}');
     }
     super.onResponse(response, handler);
   }
@@ -51,9 +53,9 @@ class _LoggingInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
     if (kDebugMode) {
-      print('❌ ERROR: ${err.type} ${err.message}');
+      debugPrint('❌ ERROR: ${err.type} ${err.message}');
       if (err.response != null) {
-        print('📥 RESPONSE: ${err.response?.statusCode} ${err.response?.data}');
+        debugPrint('📥 RESPONSE: ${err.response?.statusCode} ${err.response?.data}');
       }
     }
     super.onError(err, handler);
@@ -164,8 +166,9 @@ class _RetryInterceptor extends Interceptor {
 
   bool _shouldRetry(DioException err) {
     return err.type == DioExceptionType.connectionTimeout ||
-           err.type == DioExceptionType.receiveTimeout ||
-           err.type == DioExceptionType.sendTimeout ||
-           (err.type == DioExceptionType.badResponse && err.response?.statusCode == 500);
+        err.type == DioExceptionType.receiveTimeout ||
+        err.type == DioExceptionType.sendTimeout ||
+        (err.type == DioExceptionType.badResponse &&
+            err.response?.statusCode == 500);
   }
 }
