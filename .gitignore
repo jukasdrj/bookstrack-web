@@ -92,3 +92,4 @@ coverage/
 # Claude Code (keep hooks and prompts in git, but not sessions)
 .claude/.session
 .claude/cache/
+*.drift.dart
