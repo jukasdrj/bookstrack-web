@@ -170,19 +170,16 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
     final theme = Theme.of(context);
 
     return FilterChip(
-      label: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (icon != null) ...[
-            Icon(icon, size: 16),
-            const SizedBox(width: 4),
-          ],
-          Text(label),
-        ],
-      ),
+      label: Text(label),
       selected: isSelected,
       onSelected: (_) => onSelected(),
       selectedColor: theme.colorScheme.primaryContainer,
+      avatar: icon != null && !isSelected
+          ? Icon(
+              icon,
+              size: 18,
+            )
+          : null,
     );
   }
 
