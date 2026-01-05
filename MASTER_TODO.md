@@ -1,13 +1,16 @@
 # Master TODO List
 
-**Last Updated:** January 5, 2026
+**Last Updated:** January 5, 2026 (BendV3 v3.2.0 reviewed ✅)
 **Project Status:** Phase 2 (Search Feature) - 100% UI Complete, API Integration Pending
+**BendV3 API Version:** v3.2.0 (npm contracts resolved ✅)
 
 ---
 
 ## Summary
 
 The project is at a critical juncture between Phase 1 (Foundation) and Phase 2 (Search). While the UI for Search is complete, the data layer is currently using placeholders and requires significant updates to integrate with the BendV3 API. This master todo list prioritizes API integration, data model updates, and critical architectural fixes.
+
+**BendV3 v3.2.0 Update (Jan 5, 2026):** All npm contract issues resolved! OpenAPI spec, TypeScript SDK, and npm package now synchronized at v3.2.0. Zero breaking changes for Flutter integration. New features available: Weekly Recommendations endpoint, enhanced Capabilities API, improved SSE streaming. See `docs/api-integration/BENDV3_V3.2.0_REVIEW.md` for complete analysis.
 
 ---
 
@@ -30,15 +33,20 @@ The project is at a critical juncture between Phase 1 (Foundation) and Phase 2 (
 - **Dependencies:** None
 - **Related Files:**
   - `lib/core/data/models/dtos/work_dto.dart`
+  - `lib/core/data/models/enums/data_provider.dart` (NEW)
   - `BENDV3_API_INTEGRATION_GUIDE.md`
-- **Description:** Add 9 new fields from BendV3 API:
+  - `docs/api-integration/BENDV3_V3.2.0_REVIEW.md` (✅ v3.2.0 verified)
+- **Description:** Add 6 new fields from BendV3 v3.2.0 API:
   - `subtitle` (String?)
   - `description` (String?)
-  - `workKey` (String?)
-  - `provider` (String?)
-  - `qualityScore` (int?)
-  - `thumbnailUrl` (String?)
-  - `categories` (List<String>?)
+  - `workKey` (String?) - OpenLibrary work key
+  - `provider` (DataProvider enum) - alexandria/google_books/open_library/isbndb
+  - `qualityScore` (int?) - Range: 0-100
+  - `categories` (List<String>?) - Maps to existing subjectTags
+- **Implementation Notes:**
+  - Create DataProvider enum with JSON converter for snake_case ↔ camelCase
+  - Use @JsonKey(name: 'quality') for qualityScore field
+  - Reference npm package @jukasdrj/bookstrack-api-client@3.2.0 for canonical types
 
 ### 3. Update EditionDTO with Missing Fields
 - **Effort:** S (2-4 hours)
@@ -46,11 +54,16 @@ The project is at a critical juncture between Phase 1 (Foundation) and Phase 2 (
 - **Related Files:**
   - `lib/core/data/models/dtos/edition_dto.dart`
   - `BENDV3_API_INTEGRATION_GUIDE.md`
-- **Description:** Add missing fields:
-  - `subtitle` (String?)
-  - `editionKey` (String?)
-  - `thumbnailURL` (String?)
-  - `description` (String?)
+  - `docs/api-integration/BENDV3_V3.2.0_REVIEW.md` (✅ v3.2.0 verified)
+- **Description:** Add 5 new fields from BendV3 v3.2.0 API:
+  - `subtitle` (String?) - Same as work-level subtitle
+  - `editionKey` (String?) - OpenLibrary edition key (e.g., "OL7353617M")
+  - `thumbnailURL` (String?) - Thumbnail image URL
+  - `description` (String?) - Book-level description
+  - `categories` (List<String>?) - Edition-level categories
+- **Implementation Notes:**
+  - Use @JsonKey(name: 'thumbnailUrl') for thumbnailURL field (camelCase in JSON)
+  - Reference npm package @jukasdrj/bookstrack-api-client@3.2.0 for canonical types
 
 ### 4. Update Database Schema to v5
 - **Effort:** M (4-8 hours)
@@ -176,6 +189,26 @@ The project is at a critical juncture between Phase 1 (Foundation) and Phase 2 (
   - Call BendV3 search with both parameters
   - Display combined results
 
+### 14. Implement Weekly Recommendations Feature
+- **Effort:** S (2-4 hours)
+- **Dependencies:** BendV3Service
+- **Related Files:**
+  - `lib/features/recommendations/` (to be created)
+  - `lib/core/services/api/bendv3_service.dart`
+  - `docs/api-integration/BENDV3_V3.2.0_REVIEW.md` (✅ New in v3.2.0)
+- **Description:**
+  - Add "Weekly Picks" section to Library screen or new tab
+  - Call `GET /v3/recommendations/weekly?limit=10` endpoint
+  - Display curated recommendations with reason text
+  - Show coverUrl, title, author, and reason
+  - Recommendations update every Sunday midnight UTC
+  - Non-personalized (no auth required)
+- **Benefits:**
+  - Low effort (S: 2-4 hours)
+  - High user engagement potential
+  - Increases book discovery
+  - Differentiates from competitors
+
 ---
 
 ## Low Priority/Future (P3)
@@ -200,6 +233,24 @@ The project is at a critical juncture between Phase 1 (Foundation) and Phase 2 (
   - Add author diversity fields (gender, nationality, bio, photo)
   - Update AuthorDTO and database schema
   - Build diversity insights UI
+
+### 16. Add API Capabilities Check on Startup
+- **Effort:** XS (<2 hours)
+- **Dependencies:** BendV3Service
+- **Related Files:**
+  - `lib/core/services/api/bendv3_service.dart`
+  - `lib/app/app.dart`
+  - `docs/api-integration/BENDV3_V3.2.0_REVIEW.md` (✅ Enhanced in v3.2.0)
+- **Description:**
+  - Call `GET /v3/capabilities` on app launch
+  - Cache capabilities in shared preferences
+  - Disable UI features if backend doesn't support them
+  - Show rate limit warnings before hitting limits
+  - Display API version in "About" screen
+- **Benefits:**
+  - Forward compatibility
+  - Better error handling
+  - User-visible API version
 
 ---
 
@@ -238,8 +289,10 @@ The project is at a critical juncture between Phase 1 (Foundation) and Phase 2 (
 |----------|-------|----------------------|
 | P0       | 5     | 20-32 hours          |
 | P1       | 5     | 7-13 days            |
-| P2       | 3     | 5-9 days             |
-| P3       | 2     | 2-3 days             |
+| P2       | 4     | 5-10 days            |
+| P3       | 3     | 2-3 days             |
+
+**Total Tasks:** 17 (up from 15 - added Weekly Recommendations + API Capabilities Check)
 
 **Critical Path:** P0 items must be completed sequentially (DTOs → Schema → Service → UI Integration).
 

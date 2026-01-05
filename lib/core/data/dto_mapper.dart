@@ -1,49 +1,27 @@
 import 'package:drift/drift.dart';
-import 'package:flutter/foundation.dart';
-import 'package:uuid/uuid.dart';
-import '../database/database.dart';
-import '../models/dtos/work_dto.dart';
+
+import '../services/api/bendv3_service.dart';
+import 'database/database.dart';
+import 'models/dtos/author_dto.dart';
+import 'models/dtos/edition_dto.dart';
+import 'models/dtos/work_dto.dart';
 
 /// DTOMapper - Converts API DTOs to Drift database models
 /// Handles deduplication, synthetic works, and relationship creation
 class DTOMapper {
-  static const _uuid = Uuid();
 
-  /// Map SearchResponseData to Drift models and insert into database
+  /// Map SearchResponse to Drift models and insert into database
   static Future<List<Work>> mapAndInsertSearchResponse(
-    SearchResponseData data,
+    SearchResponse searchResponse,
     AppDatabase database,
   ) async {
     final List<Work> insertedWorks = [];
 
-    // Group editions by ISBN for deduplication
-    final editionsByISBN = <String, List<EditionDTO>>{};
-    for (final edition in data.editions) {
-      if (edition.isbn != null && edition.isbn!.isNotEmpty) {
-        editionsByISBN.putIfAbsent(edition.isbn!, () => []).add(edition);
-      }
-    }
-
-    // Validate work/edition count match
-    if (data.works.length != data.editions.length) {
-      debugPrint(
-          '⚠️ Warning: Works count (${data.works.length}) != Editions count (${data.editions.length}). Using index-based mapping may cause mismatches.');
-    }
-
-    // Process each work
-    for (var i = 0; i < data.works.length; i++) {
-      final workDTO = data.works[i];
-      final editionDTO = i < data.editions.length ? data.editions[i] : null;
-
-      // Map authors using authorIds from WorkDTO (backend provides correct relationships)
-      final authorDTOs =
-          data.authors.where((a) => workDTO.authorIds.contains(a.id)).toList();
-
-      // Warn if no authors found for this work
-      if (authorDTOs.isEmpty && workDTO.authorIds.isNotEmpty) {
-        debugPrint(
-            '⚠️ Warning: Work "${workDTO.title}" has ${workDTO.authorIds.length} author IDs but no matching authors in response');
-      }
+    // Process each book result
+    for (final bookResult in searchResponse.results) {
+      final workDTO = bookResult.work;
+      final editionDTO = bookResult.edition;
+      final authorDTOs = bookResult.authors;
 
       // Check for duplicates (synthetic works with same ISBN)
       if (workDTO.synthetic && editionDTO?.isbn != null) {
@@ -54,27 +32,49 @@ class DTOMapper {
         }
       }
 
-      // Map DTOs to database models
-      final workCompanion =
-          _mapWorkDTOToCompanion(workDTO, editionDTO, authorDTOs);
-      final authorCompanions =
-          authorDTOs.map(_mapAuthorDTOToCompanion).toList();
+      // Insert work, authors, and edition in a transaction
+      await database.transaction(() async {
+        // Insert work
+        final workCompanion = _mapWorkDTOToCompanion(workDTO, authorDTOs);
+        await database.into(database.works).insert(
+              workCompanion,
+              mode: InsertMode.insertOrReplace,
+            );
 
-      // Insert into database
-      await database.insertWorkWithAuthors(workCompanion, authorCompanions);
+        // Insert authors
+        for (final authorDTO in authorDTOs) {
+          final authorCompanion = _mapAuthorDTOToCompanion(authorDTO);
+          await database.into(database.authors).insert(
+                authorCompanion,
+                mode: InsertMode.insertOrReplace,
+              );
 
-      // If there's an edition, insert it
-      if (editionDTO != null) {
-        final editionCompanion = _mapEditionDTOToCompanion(
-          editionDTO,
-          workCompanion.id.value,
-        );
-        await database.into(database.editions).insert(editionCompanion);
-      }
+          // Create work-author relationship
+          await database.into(database.workAuthors).insert(
+                WorkAuthorsCompanion.insert(
+                  workId: workDTO.id,
+                  authorId: authorDTO.id,
+                ),
+                mode: InsertMode.insertOrReplace,
+              );
+        }
+
+        // Insert edition if present
+        if (editionDTO != null) {
+          final editionCompanion = _mapEditionDTOToCompanion(
+            editionDTO,
+            workDTO.id,
+          );
+          await database.into(database.editions).insert(
+                editionCompanion,
+                mode: InsertMode.insertOrReplace,
+              );
+        }
+      });
 
       // Fetch the inserted work
       final insertedWork = await (database.select(database.works)
-            ..where((t) => t.id.equals(workCompanion.id.value)))
+            ..where((t) => t.id.equals(workDTO.id)))
           .getSingle();
       insertedWorks.add(insertedWork);
     }
@@ -85,7 +85,6 @@ class DTOMapper {
   /// Map WorkDTO to WorksCompanion
   static WorksCompanion _mapWorkDTOToCompanion(
     WorkDTO dto,
-    EditionDTO? edition,
     List<AuthorDTO> authors,
   ) {
     // Join author names with comma separator
@@ -94,16 +93,19 @@ class DTOMapper {
     return WorksCompanion.insert(
       id: dto.id, // Use API-provided ID instead of generating UUID
       title: dto.title,
+      authorIds: dto.authorIds,
+      subjectTags: dto.subjectTags,
+      categories: dto.categories,
+      subtitle: Value(dto.subtitle),
+      description: Value(dto.description),
       author: Value(authorNames.isNotEmpty ? authorNames : null),
-      subjectTags: Value(dto.subjectTags),
       synthetic: Value(dto.synthetic),
-      primaryProvider: Value(dto.primaryProvider),
-      contributors: Value(dto.contributors),
-      googleBooksVolumeIDs: Value(dto.googleBooksVolumeIDs),
-      openLibraryWorkID: Value(dto.openLibraryWorkID),
-      reviewStatus: Value(ReviewStatus.verified),
-      createdAt: Value(DateTime.now()),
-      updatedAt: Value(DateTime.now()),
+      reviewStatus: Value(dto.reviewStatus),
+      workKey: Value(dto.workKey),
+      provider: Value(dto.provider),
+      qualityScore: Value(dto.qualityScore),
+      createdAt: Value(dto.createdAt ?? DateTime.now()),
+      updatedAt: Value(dto.updatedAt ?? DateTime.now()),
     );
   }
 
@@ -113,21 +115,24 @@ class DTOMapper {
     String workId,
   ) {
     return EditionsCompanion.insert(
-      id: _uuid.v4(),
+      id: dto.id, // Use API-provided ID
       workId: workId,
+      categories: dto.categories,
       isbn: Value(dto.isbn),
-      isbns: Value(dto.isbns),
-      title: Value(dto.title),
+      isbn10: Value(dto.isbn10),
+      isbn13: Value(dto.isbn13),
+      subtitle: Value(dto.subtitle),
       publisher: Value(dto.publisher),
       publishedYear: Value(dto.publishedYear),
       coverImageURL: Value(dto.coverImageURL),
-      format: Value(_parseEditionFormat(dto.format)),
+      thumbnailURL: Value(dto.thumbnailURL),
+      description: Value(dto.description),
+      format: Value(dto.format),
       pageCount: Value(dto.pageCount),
-      primaryProvider: Value(dto.primaryProvider),
-      googleBooksVolumeID: Value(dto.googleBooksVolumeID),
-      openLibraryEditionID: Value(dto.openLibraryEditionID),
-      createdAt: Value(DateTime.now()),
-      updatedAt: Value(DateTime.now()),
+      language: Value(dto.language),
+      editionKey: Value(dto.editionKey),
+      createdAt: Value(dto.createdAt ?? DateTime.now()),
+      updatedAt: Value(dto.updatedAt ?? DateTime.now()),
     );
   }
 
@@ -136,11 +141,12 @@ class DTOMapper {
     return AuthorsCompanion.insert(
       id: dto.id, // Use backend-provided ID (not UUID)
       name: dto.name,
-      gender: Value(_parseGender(dto.gender)),
-      culturalRegion: Value(_parseCulturalRegion(dto.culturalRegion)),
-      openLibraryAuthorID: Value(dto.openLibraryAuthorID),
-      googleBooksAuthorID: Value(dto.googleBooksAuthorID),
-      createdAt: Value(DateTime.now()),
+      gender: Value(dto.gender),
+      culturalRegion: Value(dto.culturalRegion),
+      openLibraryId: Value(dto.openLibraryId),
+      goodreadsId: Value(dto.goodreadsId),
+      createdAt: Value(dto.createdAt ?? DateTime.now()),
+      updatedAt: Value(dto.updatedAt ?? DateTime.now()),
     );
   }
 
@@ -158,65 +164,5 @@ class DTOMapper {
     return await (database.select(database.works)
           ..where((t) => t.id.equals(edition.workId)))
         .getSingleOrNull();
-  }
-
-  /// Parse edition format string to enum
-  static EditionFormat _parseEditionFormat(String format) {
-    switch (format.toLowerCase()) {
-      case 'hardcover':
-        return EditionFormat.hardcover;
-      case 'paperback':
-        return EditionFormat.paperback;
-      case 'ebook':
-      case 'e-book':
-        return EditionFormat.ebook;
-      case 'audiobook':
-        return EditionFormat.audiobook;
-      default:
-        return EditionFormat.unknown;
-    }
-  }
-
-  /// Parse gender string to enum
-  static AuthorGender _parseGender(String gender) {
-    switch (gender.toLowerCase()) {
-      case 'male':
-        return AuthorGender.male;
-      case 'female':
-        return AuthorGender.female;
-      case 'nonbinary':
-      case 'non-binary':
-        return AuthorGender.nonBinary;
-      default:
-        return AuthorGender.unknown;
-    }
-  }
-
-  /// Parse cultural region string to enum
-  static CulturalRegion? _parseCulturalRegion(String? region) {
-    if (region == null) return null;
-
-    switch (region.toLowerCase().replaceAll(' ', '')) {
-      case 'northamerica':
-        return CulturalRegion.northAmerica;
-      case 'latinamerica':
-        return CulturalRegion.latinAmerica;
-      case 'europe':
-        return CulturalRegion.europe;
-      case 'africa':
-        return CulturalRegion.africa;
-      case 'middleeast':
-        return CulturalRegion.middleEast;
-      case 'southasia':
-        return CulturalRegion.southAsia;
-      case 'eastasia':
-        return CulturalRegion.eastAsia;
-      case 'southeastasia':
-        return CulturalRegion.southeastAsia;
-      case 'oceania':
-        return CulturalRegion.oceania;
-      default:
-        return CulturalRegion.unknown;
-    }
   }
 }

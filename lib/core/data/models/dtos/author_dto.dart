@@ -11,6 +11,7 @@ class AuthorDTO with _$AuthorDTO {
     String? gender,
     String? culturalRegion,
     String? openLibraryId,
+    String? goodreadsId,
     String? wikipediaUrl,
     String? personalName,
     DateTime? birthDate,
