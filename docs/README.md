@@ -22,6 +22,9 @@ Documentation related to BendV3 API integration and data models.
 | Document | Description |
 |----------|-------------|
 | `BENDV3_API_INTEGRATION_GUIDE.md` | ⭐ Primary guide for BendV3 API integration |
+| `DTO_SYNC_GUARDRAILS.md` | 🛡️ **NEW:** 5-layer system to prevent DTO schema drift |
+| `GUARDRAILS_QUICK_REFERENCE.md` | 📋 Quick reference for guardrail commands |
+| `TYPE_MAPPING_REFERENCE.md` | 📊 TypeScript → Dart field mapping reference |
 | `API_DATA_COMPARISON.md` | Alexandria vs BendV3 comparison (reference) |
 | `API_INTEGRATION_QUICK_REFERENCE.md` | Quick reference guide |
 | `API_ENDPOINT_RECONCILIATION.md` | Endpoint mapping and reconciliation |

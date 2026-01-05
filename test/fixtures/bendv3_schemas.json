@@ -1,0 +1,101 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "BendV3 API Schemas",
+  "description": "Generated from BendV3 Zod schemas - DO NOT EDIT MANUALLY",
+  "note": "Manually created from bendv3/src/api-v3/schemas/book.ts",
+  "generatedAt": "2026-01-05T17:45:00.000Z",
+  "bendv3Path": "/Users/juju/dev_repos/bendv3/src/api-v3/schemas/book.ts",
+  "schemas": {
+    "Book": {
+      "type": "object",
+      "required": ["isbn", "title", "authors", "provider", "quality"],
+      "properties": {
+        "isbn": {
+          "type": "string",
+          "minLength": 13,
+          "maxLength": 13,
+          "description": "13-digit ISBN (example: 9780439708180)"
+        },
+        "isbn10": {
+          "type": "string",
+          "minLength": 10,
+          "maxLength": 10,
+          "description": "10-digit ISBN if available (example: 0439708184)"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Book title (example: Harry Potter and the Sorcerers Stone)"
+        },
+        "subtitle": {
+          "type": "string",
+          "description": "Book subtitle"
+        },
+        "authors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of author names (example: J.K. Rowling)"
+        },
+        "publisher": {
+          "type": "string",
+          "description": "Publisher name (example: Scholastic Inc.)"
+        },
+        "publishedDate": {
+          "type": "string",
+          "description": "Publication date in ISO 8601 or partial format (example: 1998-09-01)"
+        },
+        "description": {
+          "type": "string",
+          "description": "Book description/synopsis"
+        },
+        "pageCount": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Number of pages (example: 309)"
+        },
+        "categories": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Book categories/genres (example: Fiction, Fantasy)"
+        },
+        "language": {
+          "type": "string",
+          "description": "ISO 639-1 language code (example: en)"
+        },
+        "coverUrl": {
+          "type": "string",
+          "format": "uri",
+          "description": "Cover image URL"
+        },
+        "thumbnailUrl": {
+          "type": "string",
+          "format": "uri",
+          "description": "Thumbnail image URL"
+        },
+        "workKey": {
+          "type": "string",
+          "description": "OpenLibrary work key (example: OL82563W)"
+        },
+        "editionKey": {
+          "type": "string",
+          "description": "OpenLibrary edition key (example: OL7353617M)"
+        },
+        "provider": {
+          "type": "string",
+          "enum": ["alexandria", "google_books", "open_library", "isbndb"],
+          "description": "Data source provider (example: alexandria)"
+        },
+        "quality": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Data quality score 0-100 (example: 95)"
+        }
+      }
+    }
+  }
+}

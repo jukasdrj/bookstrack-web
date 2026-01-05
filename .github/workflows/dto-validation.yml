@@ -1,0 +1,136 @@
+name: DTO Schema Validation
+
+on:
+  pull_request:
+    paths:
+      - 'lib/core/data/models/dtos/**'
+      - 'test/core/data/models/dto_schema_compliance_test.dart'
+  push:
+    branches: [main]
+  schedule:
+    # Run daily at 2 AM UTC to catch BendV3 schema drift
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  validate-dto-schemas:
+    name: Validate DTOs against BendV3 Schemas
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout Flutter Repo
+        uses: actions/checkout@v4
+
+      - name: Checkout BendV3 Repo
+        uses: actions/checkout@v4
+        with:
+          repository: your-org/bendv3
+          token: ${{ secrets.BENDV3_ACCESS_TOKEN }}
+          path: bendv3
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.x'
+          channel: stable
+          cache: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: scripts/package.json
+
+      - name: Install Dependencies
+        run: |
+          flutter pub get
+          cd scripts && pnpm install
+
+      - name: Generate JSON Schemas from BendV3
+        run: |
+          cd scripts
+          pnpm tsx generate_dto_schema.ts
+
+      - name: Sync TypeScript Types
+        run: |
+          export BENDV3_PATH=../bendv3
+          ./scripts/sync_types_from_bendv3.sh
+
+      - name: Run Schema Compliance Tests
+        run: |
+          flutter test test/core/data/models/dto_schema_compliance_test.dart
+
+      - name: Run API Contract Tests (Staging)
+        env:
+          API_BASE_URL: https://staging-api.oooefam.net
+        run: |
+          flutter test test/integration/api_contract_test.dart --tags integration
+
+      - name: Upload Schema Artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: schema-validation-failure
+          path: |
+            test/fixtures/bendv3_schemas.json
+            test/fixtures/bendv3_types/
+
+      - name: Comment on PR
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '❌ **DTO Schema Validation Failed**\n\nYour DTO changes are incompatible with BendV3 API schemas.\n\nPlease review:\n- `test/fixtures/bendv3_schemas.json` for expected schema\n- `test/core/data/models/dto_schema_compliance_test.dart` for failures\n\nSee [workflow logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details.'
+            })
+
+  # Optional: Weekly deep validation against production
+  production-contract-test:
+    name: Validate Against Production API
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.x'
+          channel: stable
+          cache: true
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Run Production Contract Tests
+        env:
+          API_BASE_URL: https://api.oooefam.net
+        run: |
+          flutter test test/integration/api_contract_test.dart --tags integration
+
+      - name: Notify on Failure
+        if: failure()
+        uses: slackapi/slack-github-action@v1
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          payload: |
+            {
+              "text": "⚠️ Production API contract validation failed!",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Production API Contract Validation Failed*\n\nBendV3 API schema may have changed. Review DTO compatibility.\n\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Workflow>"
+                  }
+                }
+              ]
+            }
