@@ -1,0 +1,64 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // =========================================================================
+    // Helper Functions
+    // =========================================================================
+
+    /// Check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    /// Check if user owns the resource
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    /// Check if timestamp fields are valid (not in future)
+    function hasValidTimestamps() {
+      return request.resource.data.createdAt <= request.time &&
+             request.resource.data.updatedAt <= request.time;
+    }
+
+    // =========================================================================
+    // User Profile & Library
+    // =========================================================================
+
+    /// User profile: Only owner can read/write
+    match /users/{userId} {
+      allow read, write: if isOwner(userId);
+
+      /// User library entries: Only owner can read/write
+      match /library/{workId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && hasValidTimestamps();
+        allow update, delete: if isOwner(userId);
+      }
+
+      /// User editions: Only owner can read/write
+      match /editions/{editionId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && hasValidTimestamps();
+        allow update, delete: if isOwner(userId);
+      }
+
+      /// User preferences: Only owner can read/write
+      match /preferences {
+        allow read, write: if isOwner(userId);
+      }
+    }
+
+    // =========================================================================
+    // Shared Works Collection (Future: for recommendations)
+    // =========================================================================
+
+    /// Shared works: Public read, authenticated write
+    match /works/{workId} {
+      allow read: if true; // Public read for recommendations
+      allow create, update: if isAuthenticated(); // Users can contribute
+      allow delete: if false; // Never delete shared works
+    }
+  }
+}
