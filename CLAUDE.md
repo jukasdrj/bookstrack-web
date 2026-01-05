@@ -6,10 +6,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **BooksTrack Flutter** is a cross-platform book tracking application converted from iOS. The app features AI-powered bookshelf scanning using Gemini 2.0 Flash, multi-mode search, and reading analytics with diversity insights.
 
-**Current Status:** Phase 2 (Search Feature) - 100% Complete (as of Dec 26, 2025)
-**Latest Achievement:** Comprehensive multi-mode search implementation with Material 3 design
+**Current Status:** Phase 2 (Search Feature) - 100% UI Complete, API Integration Pending (as of Jan 5, 2026)
+**Latest Achievement:** Master TODO list created and documentation reorganized
 
 **Key Differentiator:** Platform-agnostic Cloudflare Workers backend means zero API changes during iOS → Flutter conversion.
+
+**Quick Links:**
+- [Master TODO List](MASTER_TODO.md) - Prioritized list of all open tasks
+- [Documentation Index](docs/README.md) - Organized documentation by category
 
 ## Technology Stack
 
@@ -624,20 +628,26 @@ static final lightTheme = ThemeData(
 
 ## Documentation
 
-### Project Documentation
+**Primary References:**
+- **[MASTER_TODO.md](MASTER_TODO.md)** - Prioritized list of all open tasks (P0-P3)
+- **[docs/README.md](docs/README.md)** - Complete documentation index
 
-**Planning & Progress:**
-- `TODO_REFINED.md` - Production roadmap (14-week plan, expert validated)
-- `IMPLEMENTATION_LOG.md` - Development progress log
-- `SESSION_SUMMARY.md` - Latest session completion (Nov 13, 2025)
-- `PHASE_1_PROGRESS.md` - Phase 1 progress tracking
+All documentation has been organized into the `docs/` directory by category:
+
+**Key Documentation Directories:**
+- `docs/api-integration/` - BendV3 API integration guides and audits
+- `docs/planning/` - Roadmaps, progress tracking, and session summaries
+- `docs/agent-optimization/` - Claude Code agent optimization
+- `docs/setup/` - Installation, linting, and deployment guides
+- `docs/firebase/` - Firebase integration and migration
+- `docs/reference/` - Legacy and reference materials
 
 **Architecture & Setup:**
 - `CLAUDE.md` - This file (AI assistant guide)
 - `.claude/README.md` - Claude Code agent setup
 - `.claude/ROBIT_OPTIMIZATION.md` - Agent architecture
 - `.claude/ROBIT_SHARING_FRAMEWORK.md` - Cross-repo agent sharing
-- `LINTING_SETUP.md` - Complete linting and code quality guide
+- `docs/setup/LINTING_SETUP.md` - Complete linting and code quality guide
 
 **Code Quality:**
 - `analysis_options.yaml` - 16 production-ready lint rules
@@ -646,13 +656,10 @@ static final lightTheme = ThemeData(
 
 **GitHub Infrastructure:**
 - `.github/LABELS.md` - Label system reference (48 labels)
+- `.github/BENDV3_FEATURE_REQUESTS.md` - BendV3 API feature request tracker
 - `.github/REORGANIZATION_COMPLETE.md` - Nov 13 reorganization summary
 - `.github/FLUTTER_ORGANIZATION_PLAN.md` - Architecture plan
 - `.github/AI_COLLABORATION.md` - AI collaboration guide
-
-**API & Data:**
-- `DTO_AUDIT_REPORT.md` - DTO compliance analysis (100% compliant)
-- `API_CLIENT_AUDIT_REPORT.md` - API client implementation details
 
 **Product Requirements:**
 - `product/*.md` - Product requirement documents (PRDs)
@@ -848,11 +855,47 @@ import 'package:books_tracker/features/library/library.dart';
 5. Consume in feature's `domain/providers/`
 6. Run code generation
 
+### API Integration Analysis (January 4, 2026)
+**Status:** Complete ✅ (Corrected for BendV3-only access)
+
+**Critical Architecture Constraint:**
+- Flutter app can **ONLY** communicate with **BendV3**
+- Alexandria is **internal** to BendV3 (not directly accessible)
+- Architecture: `Flutter → BendV3 → Alexandria (internal)`
+
+**BendV3 V3 API Endpoints Available:**
+```
+GET  /v3/books/search      - Unified search (text/semantic/similar)
+POST /v3/books/enrich      - Batch ISBN enrichment (1-500)
+GET  /v3/books/:isbn       - Direct ISBN lookup
+POST /v3/jobs/imports      - CSV import (async job)
+POST /v3/jobs/scans        - Bookshelf scan (Gemini AI)
+POST /v3/jobs/enrichment   - Background enrichment
+GET  /v3/capabilities      - API capabilities
+```
+
+**Available BendV3 Book Fields:**
+- ✅ **9 NEW fields** can be added: subtitle, description, workKey, editionKey, provider, quality (0-100), thumbnailUrl, categories
+- ❌ **Author diversity data NOT available** (gender, nationality, bio, photo) - BendV3 only returns `string[]` of names
+- ❌ **Multi-size covers NOT available** - Only single coverUrl + thumbnailUrl
+- ❌ **Alexandria endpoints NOT accessible** - All Alexandria data proxied through BendV3
+
+**Recommended Next Steps:**
+1. **Phase 1:** Add 9 available fields to DTOs (subtitle, description, etc.) - 1-2 days
+2. **Phase 2:** Implement BendV3Service with 3 main endpoints - 3-5 days
+3. **Phase 3:** Async job support (CSV import, bookshelf scan) - 1-2 weeks
+4. **Phase 4:** Semantic search when Vectorize ready - future
+
+**Documentation Created:**
+- ⭐ `BENDV3_API_INTEGRATION_GUIDE.md` - **CORRECTED** integration guide (BendV3-only)
+- `API_DATA_COMPARISON.md` - Reference comparison (Alexandria internal only)
+- `API_INTEGRATION_QUICK_REFERENCE.md` - Reference (Alexandria internal only)
+
 ---
 
-**Last Updated:** January 3, 2026
-**Project Status:** Phase 2 Search Feature - 100% Complete ✅
-**Latest Achievement:** Complete linting setup with automated pre-commit hooks
+**Last Updated:** January 5, 2026
+**Project Status:** Phase 2 Search Feature - 100% UI Complete, API Integration Pending
+**Latest Achievement:** Master TODO list created (15 prioritized tasks) + documentation reorganized into `docs/`
 **Code Quality:** Production-ready with 16 lint rules + automated formatting
 **Development Workflow:** Claude Code CLI optimized (no VS Code required)
 **Dependencies:** All 25 packages installed and code generation working (102 files generated)
