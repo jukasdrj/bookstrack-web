@@ -9,7 +9,6 @@ import 'models/dtos/work_dto.dart';
 /// DTOMapper - Converts API DTOs to Drift database models
 /// Handles deduplication, synthetic works, and relationship creation
 class DTOMapper {
-
   /// Map SearchResponse to Drift models and insert into database
   static Future<List<Work>> mapAndInsertSearchResponse(
     SearchResponse searchResponse,

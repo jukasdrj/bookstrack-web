@@ -207,9 +207,8 @@ class BookResult {
   factory BookResult.fromJson(Map<String, dynamic> json) {
     return BookResult(
       work: WorkDTO.fromJson(json['work']),
-      edition: json['edition'] != null
-          ? EditionDTO.fromJson(json['edition'])
-          : null,
+      edition:
+          json['edition'] != null ? EditionDTO.fromJson(json['edition']) : null,
       authors: (json['authors'] as List?)
               ?.map((a) => AuthorDTO.fromJson(a))
               .toList() ??
