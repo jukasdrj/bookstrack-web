@@ -169,17 +169,11 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
   }) {
     final theme = Theme.of(context);
 
+    // OPTIMIZATION: Use 'avatar' property instead of a Row in 'label' to reduce widget tree depth
+    // and allow better recycling. The icon size is kept at 16 to match original design.
     return FilterChip(
-      label: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (icon != null) ...[
-            Icon(icon, size: 16),
-            const SizedBox(width: 4),
-          ],
-          Text(label),
-        ],
-      ),
+      avatar: icon != null ? Icon(icon, size: 16) : null,
+      label: Text(label),
       selected: isSelected,
       onSelected: (_) => onSelected(),
       selectedColor: theme.colorScheme.primaryContainer,

@@ -93,7 +93,8 @@ class BookGridCard extends StatelessWidget {
               memCacheWidth: 600, // Adaptive for grid (larger)
               placeholder: (context, url) => Container(
                 color: colorScheme.surfaceContainerHighest,
-                child: Center(
+                  // OPTIMIZATION: Use const constructor to prevent unnecessary rebuilds
+                child: const Center(
                   child: CircularProgressIndicator(strokeWidth: 2),
                 ),
               ),
