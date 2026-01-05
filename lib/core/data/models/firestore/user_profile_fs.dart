@@ -16,9 +16,7 @@ class UserProfileFS with _$UserProfileFS {
     @JsonKey(name: 'createdAt')
     @TimestampConverter()
     required DateTime createdAt,
-    @JsonKey(name: 'lastSyncAt')
-    @TimestampConverter()
-    DateTime? lastSyncAt,
+    @JsonKey(name: 'lastSyncAt') @TimestampConverter() DateTime? lastSyncAt,
   }) = _UserProfileFS;
 
   factory UserProfileFS.fromJson(Map<String, dynamic> json) =>

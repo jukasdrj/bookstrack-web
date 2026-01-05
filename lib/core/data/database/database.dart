@@ -5,6 +5,7 @@ import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
+import 'package:uuid/uuid.dart' as uuid;
 
 import '../models/enums/data_provider.dart';
 
@@ -203,6 +204,129 @@ class AppDatabase extends _$AppDatabase {
   }) {
     // Placeholder - will be implemented with proper query
     return const Stream.empty();
+  }
+
+  // Get work by ID
+  Future<Work?> getWorkById(String workId) async {
+    return (select(works)..where((w) => w.id.equals(workId))).getSingleOrNull();
+  }
+
+  // Get all works (for export)
+  Future<List<Work>> getAllWorks() async {
+    return select(works).get();
+  }
+
+  // Insert work (upsert)
+  Future<void> insertWork(Work work) async {
+    await into(works).insertOnConflictUpdate(work);
+  }
+
+  // Insert edition (upsert)
+  Future<void> insertEdition(Edition edition) async {
+    await into(editions).insertOnConflictUpdate(edition);
+  }
+
+  // Update work status
+  Future<void> updateWorkStatus({
+    required String workId,
+    required ReadingStatus status,
+    DateTime? startedAt,
+    DateTime? finishedAt,
+  }) async {
+    // Find or create library entry
+    final entry = await (select(userLibraryEntries)
+          ..where((e) => e.workId.equals(workId)))
+        .getSingleOrNull();
+
+    if (entry != null) {
+      await (update(userLibraryEntries)..where((e) => e.id.equals(entry.id)))
+          .write(
+        UserLibraryEntriesCompanion(
+          status: Value(status),
+          startedAt: Value(startedAt),
+          finishedAt: Value(finishedAt),
+          updatedAt: Value(DateTime.now()),
+        ),
+      );
+    } else {
+      // Create new entry
+      await into(userLibraryEntries).insert(
+        UserLibraryEntriesCompanion.insert(
+          id: const uuid.Uuid().v4(),
+          workId: workId,
+          status: status,
+          startedAt: Value(startedAt),
+          finishedAt: Value(finishedAt),
+          createdAt: Value(DateTime.now()),
+          updatedAt: Value(DateTime.now()),
+        ),
+      );
+    }
+  }
+
+  // Update work progress
+  Future<void> updateWorkProgress({
+    required String workId,
+    required int currentPage,
+  }) async {
+    final entry = await (select(userLibraryEntries)
+          ..where((e) => e.workId.equals(workId)))
+        .getSingleOrNull();
+
+    if (entry != null) {
+      await (update(userLibraryEntries)..where((e) => e.id.equals(entry.id)))
+          .write(
+        UserLibraryEntriesCompanion(
+          currentPage: Value(currentPage),
+          updatedAt: Value(DateTime.now()),
+        ),
+      );
+    }
+  }
+
+  // Update work rating
+  Future<void> updateWorkRating({
+    required String workId,
+    required int rating,
+  }) async {
+    final entry = await (select(userLibraryEntries)
+          ..where((e) => e.workId.equals(workId)))
+        .getSingleOrNull();
+
+    if (entry != null) {
+      await (update(userLibraryEntries)..where((e) => e.id.equals(entry.id)))
+          .write(
+        UserLibraryEntriesCompanion(
+          personalRating: Value(rating),
+          updatedAt: Value(DateTime.now()),
+        ),
+      );
+    }
+  }
+
+  // Update work notes
+  Future<void> updateWorkNotes({
+    required String workId,
+    required String notes,
+  }) async {
+    final entry = await (select(userLibraryEntries)
+          ..where((e) => e.workId.equals(workId)))
+        .getSingleOrNull();
+
+    if (entry != null) {
+      await (update(userLibraryEntries)..where((e) => e.id.equals(entry.id)))
+          .write(
+        UserLibraryEntriesCompanion(
+          notes: Value(notes),
+          updatedAt: Value(DateTime.now()),
+        ),
+      );
+    }
+  }
+
+  // Delete work
+  Future<void> deleteWork(String workId) async {
+    await (delete(works)..where((w) => w.id.equals(workId))).go();
   }
 }
 

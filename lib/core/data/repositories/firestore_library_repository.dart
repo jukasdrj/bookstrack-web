@@ -233,8 +233,7 @@ class FirestoreLibraryRepository implements LibraryRepository {
 
         // Conflict resolution: Use Firestore timestamp as source of truth
         final localWork = await _localDb.getWorkById(work.id);
-        if (localWork == null ||
-            localWork.updatedAt.isBefore(work.updatedAt)) {
+        if (localWork == null || localWork.updatedAt.isBefore(work.updatedAt)) {
           await _localDb.insertWork(work);
         }
       } catch (e) {

@@ -16,12 +16,8 @@ class UserLibraryEntryFS with _$UserLibraryEntryFS {
     int? currentPage,
     int? personalRating, // 1-5
     String? notes,
-    @JsonKey(name: 'startedAt')
-    @TimestampConverter()
-    DateTime? startedAt,
-    @JsonKey(name: 'finishedAt')
-    @TimestampConverter()
-    DateTime? finishedAt,
+    @JsonKey(name: 'startedAt') @TimestampConverter() DateTime? startedAt,
+    @JsonKey(name: 'finishedAt') @TimestampConverter() DateTime? finishedAt,
     @JsonKey(name: 'createdAt')
     @TimestampConverter()
     required DateTime createdAt,
