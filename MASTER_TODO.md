@@ -1,9 +1,9 @@
 # Master TODO List
 
-**Last Updated:** January 5, 2026 (DTO Guardrails Complete ✅)
+**Last Updated:** January 6, 2026 (PR Consolidation & UI Polish Complete ✅)
 **Project Status:** Phase 2 (Search Feature) - 100% UI Complete, API Integration Pending
 **BendV3 API Version:** v3.2.0 (npm contracts resolved ✅)
-**New:** DTO Sync Guardrails System - 5-layer type-safety protection (100% schema tests passing ✅)
+**New:** FilterChip refactor + Navigation fixes + Performance optimizations merged (Jan 6, 2026)
 
 ---
 
@@ -14,6 +14,13 @@ The project is at a critical juncture between Phase 1 (Foundation) and Phase 2 (
 **BendV3 v3.2.0 Update (Jan 5, 2026):** All npm contract issues resolved! OpenAPI spec, TypeScript SDK, and npm package now synchronized at v3.2.0. Zero breaking changes for Flutter integration. New features available: Weekly Recommendations endpoint, enhanced Capabilities API, improved SSE streaming. See `docs/api-integration/BENDV3_V3.2.0_REVIEW.md` for complete analysis.
 
 **DTO Guardrails System (Jan 5, 2026):** ✅ **COMPLETE** - 5-layer type-safety system implemented and tested! Schema compliance tests: 7/7 passing (100%). API contract tests: 1/4 passing (expected - reveals real drift). Current DTO coverage: 38% (target: 80%+). CI/CD workflow ready to enable. See `docs/api-integration/DTO_SYNC_GUARDRAILS.md` for complete guide and `GUARDRAILS_SETUP_COMPLETE.md` for setup results.
+
+**UI Polish & Code Quality (Jan 6, 2026):** ✅ **COMPLETE** - Consolidated 4 overlapping PRs into 3 focused improvements:
+- FilterChip Material 3 refactor (prevents double-icon bug)
+- "Add Books" button navigation (connects Library → Search)
+- Performance optimizations (const widgets reduce rebuilds)
+- All changes reviewed by Grok (0 issues) and Gemini Code Assist
+- See git history for PR #5, #10, #11
 
 ---
 
@@ -149,18 +156,26 @@ The project is at a critical juncture between Phase 1 (Foundation) and Phase 2 (
   - Create proactive agent routing logic
   - Standardize structured output formats
 
-### 9. Fix "Navigate to Book Detail Screen" TODOs
-- **Effort:** S (2-4 hours)
-- **Dependencies:** Search UI
+### 9. ✅ Library Empty State Navigation (COMPLETE)
+- **Effort:** XS (<2 hours) - **COMPLETED** ✅
+- **Dependencies:** None
 - **Related Files:**
-  - `lib/features/library/screens/library_screen.dart`
-  - `lib/features/search/screens/search_screen.dart`
-- **Description:**
-  - Create book detail screen route
-  - Implement navigation on book card tap
-  - Display full book details with all DTO fields
+  - `lib/features/library/screens/library_screen.dart` ✅
+- **Description:** ✅ DONE - "Add Books" button now navigates to Search screen
+- **Status:** Merged in PR #10 (Jan 6, 2026)
+- **Remaining Work:** Book detail screen navigation (see new task #19 below)
 
-### 10. Implement "Add to Library" Functionality in Search
+### 10. ✅ UI Performance Optimizations (COMPLETE)
+- **Effort:** XS (<2 hours) - **COMPLETED** ✅
+- **Dependencies:** None
+- **Related Files:**
+  - `lib/shared/widgets/cards/book_card.dart` ✅
+  - `lib/shared/widgets/cards/book_grid_card.dart` ✅
+- **Description:** ✅ DONE - Added const modifiers to loading placeholder widgets
+- **Status:** Merged in PR #11 (Jan 6, 2026)
+- **Impact:** Reduces widget rebuilds during image loading, improves scrolling performance
+
+### 11. Implement "Add to Library" Functionality in Search
 - **Effort:** M (4-8 hours)
 - **Dependencies:** Database Schema v5
 - **Related Files:**
@@ -172,7 +187,7 @@ The project is at a critical juncture between Phase 1 (Foundation) and Phase 2 (
   - Create UserLibraryEntry with status selection
   - Show success feedback
 
-### 11. Web Support: Drift Wasm & Scanner Fallback
+### 12. Web Support: Drift Wasm & Scanner Fallback
 - **Effort:** L (1-2 days)
 - **Dependencies:** None
 - **Related Files:**
@@ -188,7 +203,7 @@ The project is at a critical juncture between Phase 1 (Foundation) and Phase 2 (
 
 ## Medium Priority (P2)
 
-### 12. Implement Mobile Barcode Scanner
+### 13. Implement Mobile Barcode Scanner
 - **Effort:** L (1-2 days)
 - **Dependencies:** None
 - **Related Files:**
@@ -200,7 +215,7 @@ The project is at a critical juncture between Phase 1 (Foundation) and Phase 2 (
   - Call BendV3Service ISBN lookup on scan
   - Add to library or show error
 
-### 13. Implement Bookshelf AI Scanner (Gemini)
+### 14. Implement Bookshelf AI Scanner (Gemini)
 - **Effort:** XL (3-5 days)
 - **Dependencies:** BendV3Service
 - **Related Files:**
@@ -211,7 +226,7 @@ The project is at a critical juncture between Phase 1 (Foundation) and Phase 2 (
   - Poll job status and retrieve results
   - Display detected books in review queue
 
-### 14. Implement Combined Title + Author Search
+### 15. Implement Combined Title + Author Search
 - **Effort:** S (2-4 hours)
 - **Dependencies:** BendV3Service
 - **Related Files:**
@@ -222,7 +237,7 @@ The project is at a critical juncture between Phase 1 (Foundation) and Phase 2 (
   - Call BendV3 search with both parameters
   - Display combined results
 
-### 15. Implement Weekly Recommendations Feature
+### 16. Implement Weekly Recommendations Feature
 - **Effort:** S (2-4 hours)
 - **Dependencies:** BendV3Service
 - **Related Files:**
@@ -246,7 +261,7 @@ The project is at a critical juncture between Phase 1 (Foundation) and Phase 2 (
 
 ## Low Priority/Future (P3)
 
-### 16. Multi-Size Cover URL Support
+### 17. Multi-Size Cover URL Support
 - **Effort:** M (4-8 hours)
 - **Dependencies:** BendV3 API Update
 - **Related Files:**
@@ -256,7 +271,7 @@ The project is at a critical juncture between Phase 1 (Foundation) and Phase 2 (
   - Update DTOs when API ready
   - Optimize image loading with appropriate sizes
 
-### 17. Author Diversity Data Integration
+### 18. Author Diversity Data Integration
 - **Effort:** L (1-2 days)
 - **Dependencies:** Alexandria Update
 - **Related Files:**
@@ -267,7 +282,23 @@ The project is at a critical juncture between Phase 1 (Foundation) and Phase 2 (
   - Update AuthorDTO and database schema
   - Build diversity insights UI
 
-### 18. Add API Capabilities Check on Startup
+### 19. Create Book Detail Screen & Navigation
+- **Effort:** M (4-8 hours)
+- **Dependencies:** None
+- **Related Files:**
+  - `lib/features/book_detail/` (to be created)
+  - `lib/features/library/screens/library_screen.dart`
+  - `lib/features/search/screens/search_screen.dart`
+  - `lib/app/router.dart`
+- **Description:**
+  - Create book detail screen with full work/edition information
+  - Add route: `/book/:workId`
+  - Implement navigation from Library book cards
+  - Implement navigation from Search results
+  - Display all DTO fields (cover, title, author, description, ratings, etc.)
+  - Add "Add to Library" / "Update Status" actions
+
+### 20. Add API Capabilities Check on Startup
 - **Effort:** XS (<2 hours)
 - **Dependencies:** BendV3Service
 - **Related Files:**
@@ -290,29 +321,32 @@ The project is at a critical juncture between Phase 1 (Foundation) and Phase 2 (
 ## Code TODOs to Address
 
 **From Codebase Scan:**
-1. `lib/features/library/screens/library_screen.dart:xyz` - Navigate to book detail screen
-2. `lib/features/search/screens/search_screen.dart:xyz` - Navigate to book detail screen
-3. `lib/features/search/screens/search_screen.dart:xyz` - Implement "Add to Library" action
-4. `.claude/agents/` - Complete Flutter-specific agent configurations
+1. ✅ ~~`lib/features/library/screens/library_screen.dart:257` - Navigate to search/scanner~~ (DONE - PR #10)
+2. `lib/features/library/screens/library_screen.dart:199` - Navigate to book detail screen (onTap handler)
+3. `lib/features/search/screens/search_screen.dart:xyz` - Navigate to book detail screen (onTap handler)
+4. `lib/features/search/screens/search_screen.dart:xyz` - Implement "Add to Library" action
+5. `.claude/agents/` - Complete Flutter-specific agent configurations
 
 ---
 
 ## Open Issues & PRs
 
-**Git Status Analysis:**
-- **Modified:** `CLAUDE.md` - Update and commit changes
-- **Untracked:**
-  - `.github/BENDV3_FEATURE_REQUESTS.md`
-  - `API_DATA_COMPARISON.md`
-  - `API_ENDPOINT_RECONCILIATION.md`
-  - `API_INTEGRATION_QUICK_REFERENCE.md`
-  - `BENDV3_API_INTEGRATION_GUIDE.md`
-  - `NPM_PACKAGE_VS_OPENAPI_ANALYSIS.md`
-  - `PR242_FRONTEND_INTEGRATION_GUIDE.md`
-  - `PRD/docs/openapi-v3-live-formatted.json`
-  - `PRD/docs/openapi-v3-live.json`
+**GitHub Issues (4 Open):**
+1. **#6** - Security: Add input validation and sanitization for API responses (P0, enhancement)
+2. **#4** - Personalized Book Recommendations (enhancement)
+3. **#3** - Backend API Auth Tokens (enhancement, authentication)
+4. **#2** - Firestore Cloud Sync (enhancement, firebase)
 
-**Action Required:** Organize all untracked markdown files into `docs/` directory.
+**Pull Requests:**
+- ✅ All PRs merged or closed as of Jan 6, 2026
+- ✅ PR #5: FilterChip refactor (MERGED)
+- ✅ PR #10: Navigation fix (MERGED)
+- ✅ PR #11: Performance optimizations (MERGED)
+- ❌ PR #7, #8, #9: Closed (duplicates/consolidated)
+
+**Git Status:**
+- **Clean** - All changes committed and pushed to main
+- **Action Required:** None
 
 ---
 
@@ -321,16 +355,18 @@ The project is at a critical juncture between Phase 1 (Foundation) and Phase 2 (
 | Priority | Count | Completed | Total Effort Estimate |
 |----------|-------|-----------|----------------------|
 | P0       | 5     | 0         | 20-32 hours          |
-| P1       | 6     | 1 ✅      | 7-13 days            |
+| P1       | 8     | 3 ✅      | 6-11 days (reduced)  |
 | P2       | 4     | 0         | 5-10 days            |
-| P3       | 3     | 0         | 2-3 days             |
+| P3       | 4     | 0         | 2-3 days             |
 
-**Total Tasks:** 18 (up from 17)
-**Completed:** 1 (DTO Guardrails System ✅)
-**Remaining:** 17
+**Total Tasks:** 21 (up from 18)
+**Completed:** 3 (DTO Guardrails, Navigation, Performance ✅)
+**Remaining:** 18
 
-**Recent Completion:**
+**Recent Completions:**
 - ✅ P1 #6: DTO Sync Guardrails System (Jan 5, 2026) - 5-layer type-safety protection
+- ✅ P1 #9: Library Empty State Navigation (Jan 6, 2026) - "Add Books" button functional
+- ✅ P1 #10: UI Performance Optimizations (Jan 6, 2026) - const widgets for loading states
 
 **Critical Path:** P0 items must be completed sequentially (DTOs → Schema → Service → UI Integration).
 
