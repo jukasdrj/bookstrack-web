@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:books_tracker/core/data/database/database.dart';
 import 'package:books_tracker/shared/widgets/cards/book_card.dart';
 import 'package:books_tracker/shared/widgets/cards/book_grid_card.dart';
@@ -254,7 +255,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
             const SizedBox(height: 24),
             FilledButton.icon(
               onPressed: () {
-                // TODO: Navigate to search/scanner
+                context.go('/search');
               },
               icon: const Icon(Icons.add),
               label: const Text('Add Books'),
