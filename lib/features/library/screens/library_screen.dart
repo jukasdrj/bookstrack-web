@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:books_tracker/core/data/database/database.dart';
 import 'package:books_tracker/shared/widgets/cards/book_card.dart';
 import 'package:books_tracker/shared/widgets/cards/book_grid_card.dart';
+import 'package:go_router/go_router.dart';
 import '../providers/library_providers.dart';
 
 /// Library Screen - Main screen showing user's book collection
@@ -170,16 +171,8 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
     final theme = Theme.of(context);
 
     return FilterChip(
-      label: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (icon != null) ...[
-            Icon(icon, size: 16),
-            const SizedBox(width: 4),
-          ],
-          Text(label),
-        ],
-      ),
+      label: Text(label),
+      avatar: icon != null ? Icon(icon, size: 16) : null,
       selected: isSelected,
       onSelected: (_) => onSelected(),
       selectedColor: theme.colorScheme.primaryContainer,
@@ -257,7 +250,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
             const SizedBox(height: 24),
             FilledButton.icon(
               onPressed: () {
-                // TODO: Navigate to search/scanner
+                context.go('/search');
               },
               icon: const Icon(Icons.add),
               label: const Text('Add Books'),
