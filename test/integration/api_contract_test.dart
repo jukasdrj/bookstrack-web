@@ -23,8 +23,8 @@ void main() {
     late Dio dio;
 
     setUp(() {
-      final baseUrl =
-          const String.fromEnvironment('API_BASE_URL', defaultValue: 'https://api.oooefam.net');
+      final baseUrl = const String.fromEnvironment('API_BASE_URL',
+          defaultValue: 'https://api.oooefam.net');
       dio = Dio(BaseOptions(
         baseUrl: baseUrl,
         receiveTimeout: const Duration(seconds: 30),
@@ -45,7 +45,8 @@ void main() {
       expect(bookData['isbn'].length, 13);
       expect(bookData['title'], isA<String>());
       expect(bookData['authors'], isA<List>());
-      expect(bookData['provider'], isIn(['alexandria', 'google_books', 'open_library', 'isbndb']));
+      expect(bookData['provider'],
+          isIn(['alexandria', 'google_books', 'open_library', 'isbndb']));
       expect(bookData['quality'], isA<num>());
       expect(bookData['quality'], inInclusiveRange(0, 100));
 
@@ -62,7 +63,8 @@ void main() {
       }
     });
 
-    test('GET /v3/books/search returns valid BookSearchResults schema', () async {
+    test('GET /v3/books/search returns valid BookSearchResults schema',
+        () async {
       final response = await dio.get('/v3/books/search', queryParameters: {
         'q': 'harry potter',
         'limit': 10,
