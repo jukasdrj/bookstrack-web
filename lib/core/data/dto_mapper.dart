@@ -6,10 +6,67 @@ import 'models/dtos/author_dto.dart';
 import 'models/dtos/edition_dto.dart';
 import 'models/dtos/work_dto.dart';
 
-/// DTOMapper - Converts API DTOs to Drift database models
-/// Handles deduplication, synthetic works, and relationship creation
+/// Maps BendV3 API DTOs to Drift database models with transactional safety.
+///
+/// This mapper handles the complex transformation from BendV3's [BookResult] format
+/// to the app's normalized database schema. It ensures data integrity through:
+///
+/// **Key Responsibilities:**
+/// 1. **Work Mapping** - Converts WorkDTO → Works table
+///    - Uses API-provided IDs (no UUID generation)
+///    - Maps v3.2.0 fields (subtitle, description, qualityScore, provider, etc.)
+///    - Denormalizes author names for display
+///
+/// 2. **Author Relationships** - Many-to-many work-author mapping
+///    - Uses WorkAuthors junction table
+///    - Prevents duplicate author entries (insertOrReplace mode)
+///    - Relies on `workDTO.authorIds` for correct relationships
+///
+/// 3. **Edition Mapping** - Converts EditionDTO → Editions table
+///    - Links to parent work via workId foreign key
+///    - Supports multiple editions per work
+///    - Maps v3.2.0 fields (thumbnailURL, editionKey, etc.)
+///
+/// 4. **Deduplication** - Prevents duplicate synthetic works
+///    - Checks for existing works with same ISBN
+///    - Skips insertion if duplicate found
+///
+/// 5. **Transactional Safety** - Uses `database.transaction()` to ensure:
+///    - All-or-nothing inserts (prevents partial data)
+///    - Foreign key integrity maintained
+///    - Safe concurrent access
+///
+/// **Performance Considerations:**
+/// - Uses `insertOrReplace` to handle duplicates efficiently
+/// - Batch processing in single transaction per book
+/// - Indexes on foreign keys optimize lookups
+///
+/// **Example:**
+/// ```dart
+/// final response = await bendv3Service.searchBooks(query: 'Dune');
+/// final works = await DTOMapper.mapAndInsertSearchResponse(
+///   response,
+///   database: database,
+/// );
+/// print('Inserted ${works.length} works into database');
+/// ```
 class DTOMapper {
-  /// Map SearchResponse to Drift models and insert into database
+  /// Maps and inserts a [SearchResponse] into the database.
+  ///
+  /// Processes all [BookResult] objects in the response, inserting works,
+  /// editions, authors, and work-author relationships transactionally.
+  ///
+  /// **Parameters:**
+  /// - [searchResponse] - Response from [BendV3Service.searchBooks]
+  /// - [database] - Drift database instance
+  ///
+  /// **Returns:** List of inserted [Work] objects (excluding duplicates)
+  ///
+  /// **Deduplication:** Skips synthetic works if an existing work with the
+  /// same ISBN is already in the database.
+  ///
+  /// **Transaction:** Each book result is inserted in its own transaction
+  /// (work + authors + relationships + edition).
   static Future<List<Work>> mapAndInsertSearchResponse(
     SearchResponse searchResponse,
     AppDatabase database,
@@ -81,7 +138,19 @@ class DTOMapper {
     return insertedWorks;
   }
 
-  /// Map WorkDTO to WorksCompanion
+  /// Converts a [WorkDTO] to a Drift [WorksCompanion] for database insertion.
+  ///
+  /// **Key Mappings:**
+  /// - Uses `dto.id` from API (NOT generated UUID)
+  /// - Denormalizes author names into `author` field for display
+  /// - Maps all v3.2.0 fields (subtitle, description, workKey, provider, qualityScore)
+  /// - Sets `createdAt`/`updatedAt` to DTO values or current time
+  ///
+  /// **Parameters:**
+  /// - [dto] - Work DTO from BendV3 API
+  /// - [authors] - List of authors for denormalization
+  ///
+  /// **Returns:** [WorksCompanion] ready for insertion
   static WorksCompanion _mapWorkDTOToCompanion(
     WorkDTO dto,
     List<AuthorDTO> authors,
@@ -108,7 +177,19 @@ class DTOMapper {
     );
   }
 
-  /// Map EditionDTO to EditionsCompanion
+  /// Converts an [EditionDTO] to a Drift [EditionsCompanion] for database insertion.
+  ///
+  /// **Key Mappings:**
+  /// - Uses `dto.id` from API (NOT generated UUID)
+  /// - Links to parent work via [workId] foreign key
+  /// - Maps all v3.2.0 fields (subtitle, thumbnailURL, editionKey, description)
+  /// - Handles all three ISBN formats (isbn, isbn10, isbn13)
+  ///
+  /// **Parameters:**
+  /// - [dto] - Edition DTO from BendV3 API
+  /// - [workId] - Parent work ID for foreign key
+  ///
+  /// **Returns:** [EditionsCompanion] ready for insertion
   static EditionsCompanion _mapEditionDTOToCompanion(
     EditionDTO dto,
     String workId,
@@ -135,7 +216,17 @@ class DTOMapper {
     );
   }
 
-  /// Map AuthorDTO to AuthorsCompanion
+  /// Converts an [AuthorDTO] to a Drift [AuthorsCompanion] for database insertion.
+  ///
+  /// **Key Mappings:**
+  /// - Uses `dto.id` from API (NOT generated UUID)
+  /// - Maps diversity fields (gender, culturalRegion)
+  /// - Maps external IDs (openLibraryId, goodreadsId)
+  ///
+  /// **Parameters:**
+  /// - [dto] - Author DTO from BendV3 API
+  ///
+  /// **Returns:** [AuthorsCompanion] ready for insertion
   static AuthorsCompanion _mapAuthorDTOToCompanion(AuthorDTO dto) {
     return AuthorsCompanion.insert(
       id: dto.id, // Use backend-provided ID (not UUID)
@@ -149,7 +240,23 @@ class DTOMapper {
     );
   }
 
-  /// Find work by ISBN (for deduplication)
+  /// Finds an existing work by ISBN for deduplication purposes.
+  ///
+  /// Used to prevent inserting duplicate synthetic works. Searches for an
+  /// edition with the given ISBN, then returns its parent work.
+  ///
+  /// **Process:**
+  /// 1. Query Editions table for matching ISBN
+  /// 2. If found, query Works table using edition's workId
+  /// 3. Return work if found, null otherwise
+  ///
+  /// **Parameters:**
+  /// - [isbn] - ISBN to search for (ISBN-10 or ISBN-13)
+  /// - [database] - Drift database instance
+  ///
+  /// **Returns:**
+  /// - [Work] if a book with this ISBN exists
+  /// - `null` if no match found
   static Future<Work?> _findWorkByISBN(
       String isbn, AppDatabase database) async {
     // Find edition with this ISBN
