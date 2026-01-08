@@ -104,9 +104,6 @@ class BookCard extends StatelessWidget {
                 memCacheHeight: 360, // 120 * 3
                 placeholder: (context, url) => Container(
                   color: colorScheme.surfaceContainerHighest,
-                  child: const Center(
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
                 ),
                 errorWidget: (context, url, error) =>
                     _buildPlaceholder(colorScheme),
