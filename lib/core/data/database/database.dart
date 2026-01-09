@@ -120,6 +120,8 @@ class WorkAuthors extends Table {
   Set<Column> get primaryKey => {workId, authorId};
 }
 
+@TableIndex(name: 'user_library_entries_status_idx', columns: {#status})
+@TableIndex(name: 'user_library_entries_work_id_idx', columns: {#workId})
 class UserLibraryEntries extends Table {
   TextColumn get id => text()();
   TextColumn get workId => text().references(Works, #id)();
@@ -180,7 +182,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -192,6 +194,14 @@ class AppDatabase extends _$AppDatabase {
             // Migration from v4 to v5: Add new BendV3 v3.2.0 fields
             // Since we're replacing placeholders, we'll recreate all tables
             await m.createAll();
+          }
+
+          if (from < 6) {
+            // Migration to v6: Add indexes for performance
+            await m.issueCustomQuery(
+                'CREATE INDEX IF NOT EXISTS user_library_entries_status_idx ON user_library_entries (status)');
+            await m.issueCustomQuery(
+                'CREATE INDEX IF NOT EXISTS user_library_entries_work_id_idx ON user_library_entries (work_id)');
           }
         },
       );
