@@ -211,9 +211,17 @@ SearchState searchWithQuery(SearchWithQueryRef ref) {
       // Simple debouncing - cancel previous search
       Future.delayed(const Duration(milliseconds: 300), () {
         if (ref.read(searchQueryProvider) == next) {
+          // Avoid duplicate search if already loading or showing results for same query/scope
+          final currentState = ref.read(searchProvider);
+          final currentScope = ref.read(searchScopeNotifierProvider);
+          if (currentState.currentQuery == next &&
+              currentState.currentScope == currentScope) {
+            return;
+          }
+
           ref.read(searchProvider.notifier).search(
                 query: next,
-                scope: ref.read(searchScopeNotifierProvider),
+                scope: currentScope,
               );
         }
       });

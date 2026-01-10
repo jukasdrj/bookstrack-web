@@ -33,7 +33,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final searchState = ref.watch(searchProvider);
+    final searchState = ref.watch(searchWithQueryProvider);
     final currentScope = ref.watch(searchScopeNotifierProvider);
 
     return Scaffold(
