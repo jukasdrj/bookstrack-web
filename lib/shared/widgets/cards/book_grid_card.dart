@@ -91,11 +91,9 @@ class BookGridCard extends StatelessWidget {
               imageUrl: coverUrl,
               fit: BoxFit.cover,
               memCacheWidth: 600, // Adaptive for grid (larger)
+              // Use static placeholder for better grid scrolling performance
               placeholder: (context, url) => Container(
                 color: colorScheme.surfaceContainerHighest,
-                child: const Center(
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
               ),
               errorWidget: (context, url, error) =>
                   _buildPlaceholder(colorScheme),
@@ -157,4 +155,5 @@ class BookGridCard extends StatelessWidget {
       ReadingStatus.read => Colors.green,
     };
   }
+
 }
