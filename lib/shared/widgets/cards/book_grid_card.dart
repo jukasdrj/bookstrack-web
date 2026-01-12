@@ -67,7 +67,7 @@ class BookGridCard extends StatelessWidget {
                       children: [
                         _buildStatusDot(colorScheme),
                         const Spacer(),
-                        if (bookData.libraryEntry.personalRating != null)
+                        if (bookData.libraryEntry?.personalRating != null)
                           _buildCompactRating(theme),
                       ],
                     ),
@@ -115,20 +115,34 @@ class BookGridCard extends StatelessWidget {
   }
 
   Widget _buildStatusDot(ColorScheme colorScheme) {
-    final statusColor = _getStatusColor(bookData.status);
+    // Check if status is null (not in library)
+    final status = bookData.status;
+    if (status == null) {
+      return const SizedBox.shrink();
+    }
 
-    return Container(
-      width: 8,
-      height: 8,
-      decoration: BoxDecoration(
-        color: statusColor,
-        shape: BoxShape.circle,
+    final statusColor = _getStatusColor(status);
+    final statusLabel = _getStatusLabel(status);
+
+    return Tooltip(
+      message: statusLabel,
+      child: Semantics(
+        label: 'Status: $statusLabel',
+        image: true,
+        child: Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(
+            color: statusColor,
+            shape: BoxShape.circle,
+          ),
+        ),
       ),
     );
   }
 
   Widget _buildCompactRating(ThemeData theme) {
-    final rating = bookData.libraryEntry.personalRating!;
+    final rating = bookData.libraryEntry!.personalRating!;
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -155,6 +169,15 @@ class BookGridCard extends StatelessWidget {
       ReadingStatus.toRead => Colors.blue,
       ReadingStatus.reading => Colors.orange,
       ReadingStatus.read => Colors.green,
+    };
+  }
+
+  String _getStatusLabel(ReadingStatus status) {
+    return switch (status) {
+      ReadingStatus.wishlist => 'Wishlist',
+      ReadingStatus.toRead => 'To Read',
+      ReadingStatus.reading => 'Reading',
+      ReadingStatus.read => 'Read',
     };
   }
 }
