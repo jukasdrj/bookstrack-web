@@ -101,11 +101,16 @@ class BookCard extends StatelessWidget {
                 imageUrl: coverUrl,
                 fit: BoxFit.cover,
                 memCacheWidth: 240, // 80 * 3 (for 3x displays)
-                memCacheHeight: 360, // 120 * 3
+                // Optimize: Removed memCacheHeight to prevent distortion on variable aspect ratios
+                // Optimize: Use static placeholder to prevent main-thread jank during scrolling
                 placeholder: (context, url) => Container(
                   color: colorScheme.surfaceContainerHighest,
-                  child: const Center(
-                    child: CircularProgressIndicator(strokeWidth: 2),
+                  child: Center(
+                    child: Icon(
+                      Icons.image,
+                      color: colorScheme.onSurfaceVariant.withOpacity(0.5),
+                      size: 24,
+                    ),
                   ),
                 ),
                 errorWidget: (context, url, error) =>
