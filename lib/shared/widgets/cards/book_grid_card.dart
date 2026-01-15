@@ -91,11 +91,9 @@ class BookGridCard extends StatelessWidget {
               imageUrl: coverUrl,
               fit: BoxFit.cover,
               memCacheWidth: 600, // Adaptive for grid (larger)
+              // Performance: Static placeholder for better scroll performance
               placeholder: (context, url) => Container(
                 color: colorScheme.surfaceContainerHighest,
-                child: const Center(
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
               ),
               errorWidget: (context, url, error) =>
                   _buildPlaceholder(colorScheme),
@@ -117,12 +115,18 @@ class BookGridCard extends StatelessWidget {
   Widget _buildStatusDot(ColorScheme colorScheme) {
     final statusColor = _getStatusColor(bookData.status);
 
-    return Container(
-      width: 8,
-      height: 8,
-      decoration: BoxDecoration(
-        color: statusColor,
-        shape: BoxShape.circle,
+    return Tooltip(
+      message: bookData.status.toString().split('.').last,
+      child: Semantics(
+        label: 'Status: ${bookData.status.toString().split('.').last}',
+        child: Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(
+            color: statusColor,
+            shape: BoxShape.circle,
+          ),
+        ),
       ),
     );
   }
