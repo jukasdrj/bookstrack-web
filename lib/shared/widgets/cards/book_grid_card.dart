@@ -67,7 +67,7 @@ class BookGridCard extends StatelessWidget {
                       children: [
                         _buildStatusDot(colorScheme),
                         const Spacer(),
-                        if (bookData.libraryEntry.personalRating != null)
+                        if (bookData.libraryEntry?.personalRating != null)
                           _buildCompactRating(theme),
                       ],
                     ),
@@ -115,20 +115,28 @@ class BookGridCard extends StatelessWidget {
   }
 
   Widget _buildStatusDot(ColorScheme colorScheme) {
-    final statusColor = _getStatusColor(bookData.status);
+    final status = bookData.status;
+    final statusColor = _getStatusColor(status);
+    final statusLabel = _getStatusLabel(status);
 
-    return Container(
-      width: 8,
-      height: 8,
-      decoration: BoxDecoration(
-        color: statusColor,
-        shape: BoxShape.circle,
+    return Tooltip(
+      message: statusLabel,
+      child: Semantics(
+        label: 'Status: $statusLabel',
+        child: Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(
+            color: statusColor,
+            shape: BoxShape.circle,
+          ),
+        ),
       ),
     );
   }
 
   Widget _buildCompactRating(ThemeData theme) {
-    final rating = bookData.libraryEntry.personalRating!;
+    final rating = bookData.libraryEntry!.personalRating!;
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -149,12 +157,23 @@ class BookGridCard extends StatelessWidget {
     );
   }
 
-  Color _getStatusColor(ReadingStatus status) {
+  Color _getStatusColor(ReadingStatus? status) {
     return switch (status) {
       ReadingStatus.wishlist => Colors.purple,
       ReadingStatus.toRead => Colors.blue,
       ReadingStatus.reading => Colors.orange,
       ReadingStatus.read => Colors.green,
+      null => Colors.grey,
+    };
+  }
+
+  String _getStatusLabel(ReadingStatus? status) {
+    return switch (status) {
+      ReadingStatus.wishlist => 'Wishlist',
+      ReadingStatus.toRead => 'To Read',
+      ReadingStatus.reading => 'Reading',
+      ReadingStatus.read => 'Read',
+      null => 'Unknown',
     };
   }
 }
