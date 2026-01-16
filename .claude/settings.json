@@ -1,0 +1,22 @@
+{
+  "plansDirectory": ".claude/plans",
+  "dart": {
+    "lineLength": 100,
+    "analyzerEnabled": true
+  },
+  "flutter": {
+    "hotReloadEnabled": true,
+    "buildRunner": {
+      "watchOnSave": true,
+      "deleteConflictingOutputs": true
+    }
+  },
+  "testing": {
+    "runOnSave": false,
+    "coverage": true
+  },
+  "git": {
+    "preCommitHook": true,
+    "autoFormat": true
+  }
+}

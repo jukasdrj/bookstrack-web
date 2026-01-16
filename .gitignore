@@ -93,3 +93,11 @@ coverage/
 .claude/.session
 .claude/cache/
 *.drift.dart
+
+# Claude Code planning files (ephemeral AI collaboration artifacts)
+task_plan.md
+findings.md
+progress.md
+.claude/plans/task_plan.md
+.claude/plans/findings.md
+.claude/plans/progress.md
