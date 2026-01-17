@@ -148,21 +148,10 @@ class BookSearchResultCard extends StatelessWidget {
               imageUrl: coverUrl,
               fit: BoxFit.cover,
               memCacheWidth: 120, // 60 * 2 for 2x displays
-              memCacheHeight: 160, // 80 * 2
+              // Performance: Avoid memCacheHeight to maintain aspect ratio without distortion
+              // Performance: Use static container instead of CircularProgressIndicator to reduce main thread load during scroll
               placeholder: (context, url) => Container(
                 color: colorScheme.surfaceContainerHighest,
-                child: Center(
-                  child: SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ),
-                ),
               ),
               errorWidget: (context, url, error) =>
                   _buildPlaceholder(colorScheme),
