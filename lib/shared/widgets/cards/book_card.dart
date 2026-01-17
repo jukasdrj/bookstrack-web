@@ -70,7 +70,7 @@ class BookCard extends StatelessWidget {
                       children: [
                         _buildStatusChip(context),
                         const Spacer(),
-                        if (bookData.libraryEntry.personalRating != null)
+                        if (bookData.libraryEntry?.personalRating != null)
                           _buildRating(context),
                       ],
                     ),
@@ -117,11 +117,7 @@ class BookCard extends StatelessWidget {
   }
 
   Widget _buildPlaceholder(ColorScheme colorScheme) {
-    return Icon(
-      Icons.book,
-      size: 40,
-      color: colorScheme.onSurfaceVariant,
-    );
+    return Icon(Icons.book, size: 40, color: colorScheme.onSurfaceVariant);
   }
 
   Widget _buildProgressIndicator(BuildContext context) {
@@ -152,13 +148,13 @@ class BookCard extends StatelessWidget {
             ),
           ],
         ),
-        if (bookData.libraryEntry.currentPage != null &&
+        if (bookData.libraryEntry?.currentPage != null &&
             bookData.edition?.pageCount != null)
           const SizedBox(height: 2),
-        if (bookData.libraryEntry.currentPage != null &&
+        if (bookData.libraryEntry?.currentPage != null &&
             bookData.edition?.pageCount != null)
           Text(
-            'Page ${bookData.libraryEntry.currentPage} of ${bookData.edition!.pageCount}',
+            'Page ${bookData.libraryEntry!.currentPage} of ${bookData.edition!.pageCount}',
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -169,24 +165,21 @@ class BookCard extends StatelessWidget {
 
   Widget _buildStatusChip(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final status = bookData.status;
+    if (status == null) return const SizedBox.shrink();
 
-    final statusConfig = _getStatusConfig(bookData.status);
+    final statusConfig = _getStatusConfig(status);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: statusConfig.color.withOpacity(0.12),
+        color: statusConfig.color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            statusConfig.icon,
-            size: 14,
-            color: statusConfig.color,
-          ),
+          Icon(statusConfig.icon, size: 14, color: statusConfig.color),
           const SizedBox(width: 4),
           Text(
             statusConfig.label,
@@ -201,7 +194,8 @@ class BookCard extends StatelessWidget {
   }
 
   Widget _buildRating(BuildContext context) {
-    final rating = bookData.libraryEntry.personalRating!;
+    final rating = bookData.libraryEntry?.personalRating;
+    if (rating == null) return const SizedBox.shrink();
     final theme = Theme.of(context);
 
     return Row(
@@ -218,28 +212,29 @@ class BookCard extends StatelessWidget {
   }
 
   ({Color color, IconData icon, String label}) _getStatusConfig(
-      ReadingStatus status) {
+    ReadingStatus status,
+  ) {
     return switch (status) {
       ReadingStatus.wishlist => (
-          color: Colors.purple,
-          icon: Icons.bookmark_border,
-          label: 'Wishlist',
-        ),
+        color: Colors.purple,
+        icon: Icons.bookmark_border,
+        label: 'Wishlist',
+      ),
       ReadingStatus.toRead => (
-          color: Colors.blue,
-          icon: Icons.book_outlined,
-          label: 'To Read',
-        ),
+        color: Colors.blue,
+        icon: Icons.book_outlined,
+        label: 'To Read',
+      ),
       ReadingStatus.reading => (
-          color: Colors.orange,
-          icon: Icons.auto_stories,
-          label: 'Reading',
-        ),
+        color: Colors.orange,
+        icon: Icons.auto_stories,
+        label: 'Reading',
+      ),
       ReadingStatus.read => (
-          color: Colors.green,
-          icon: Icons.check_circle_outline,
-          label: 'Read',
-        ),
+        color: Colors.green,
+        icon: Icons.check_circle_outline,
+        label: 'Read',
+      ),
     };
   }
 }

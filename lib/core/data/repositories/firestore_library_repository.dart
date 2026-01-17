@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart' show debugPrint;
+
 import 'package:books_tracker/core/data/database/database.dart';
 import 'package:books_tracker/core/data/models/firestore/user_library_entry_fs.dart';
 import 'package:books_tracker/core/domain/repositories/library_repository.dart';
@@ -12,8 +14,8 @@ class FirestoreLibraryRepository implements LibraryRepository {
   FirestoreLibraryRepository({
     required AppDatabase localDb,
     required FirebaseFirestore firestore,
-  })  : _localDb = localDb,
-        _firestore = firestore;
+  }) : _localDb = localDb,
+       _firestore = firestore;
 
   @override
   Stream<List<Work>> watchLibrary({
@@ -31,13 +33,14 @@ class FirestoreLibraryRepository implements LibraryRepository {
 
     // Background sync: Pull latest from Firestore when available
     if (userId != null) {
-      _syncFromFirestore(userId).catchError((error) {
+      _syncFromFirestore(userId).catchError((Object error) {
         // Silent fail - local data still works
-        print('Background sync failed: $error');
+        debugPrint('Background sync failed: $error');
       });
     }
 
-    return localStream;
+    // Map WorkWithLibraryStatus to Work for interface compatibility
+    return localStream.map((items) => items.map((item) => item.work).toList());
   }
 
   @override
@@ -105,11 +108,11 @@ class FirestoreLibraryRepository implements LibraryRepository {
         .collection('library')
         .doc(workId)
         .update({
-      'status': status.name,
-      if (startedAt != null) 'startedAt': Timestamp.fromDate(startedAt),
-      if (finishedAt != null) 'finishedAt': Timestamp.fromDate(finishedAt),
-      'updatedAt': FieldValue.serverTimestamp(),
-    });
+          'status': status.name,
+          if (startedAt != null) 'startedAt': Timestamp.fromDate(startedAt),
+          if (finishedAt != null) 'finishedAt': Timestamp.fromDate(finishedAt),
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
   }
 
   @override
@@ -128,9 +131,9 @@ class FirestoreLibraryRepository implements LibraryRepository {
         .collection('library')
         .doc(workId)
         .update({
-      'currentPage': currentPage,
-      'updatedAt': FieldValue.serverTimestamp(),
-    });
+          'currentPage': currentPage,
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
   }
 
   @override
@@ -149,9 +152,9 @@ class FirestoreLibraryRepository implements LibraryRepository {
         .collection('library')
         .doc(workId)
         .update({
-      'personalRating': rating,
-      'updatedAt': FieldValue.serverTimestamp(),
-    });
+          'personalRating': rating,
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
   }
 
   @override
@@ -169,10 +172,7 @@ class FirestoreLibraryRepository implements LibraryRepository {
         .doc(userId)
         .collection('library')
         .doc(workId)
-        .update({
-      'notes': notes,
-      'updatedAt': FieldValue.serverTimestamp(),
-    });
+        .update({'notes': notes, 'updatedAt': FieldValue.serverTimestamp()});
   }
 
   @override
@@ -206,10 +206,7 @@ class FirestoreLibraryRepository implements LibraryRepository {
   Stream<SyncStatus> watchSyncStatus(String userId) {
     // TODO: Implement sync status tracking
     // For now, return a simple stream
-    return Stream.value(const SyncStatus(
-      isSyncing: false,
-      pendingUploads: 0,
-    ));
+    return Stream.value(const SyncStatus(isSyncing: false, pendingUploads: 0));
   }
 
   // =========================================================================
@@ -233,11 +230,16 @@ class FirestoreLibraryRepository implements LibraryRepository {
 
         // Conflict resolution: Use Firestore timestamp as source of truth
         final localWork = await _localDb.getWorkById(work.id);
-        if (localWork == null || localWork.updatedAt.isBefore(work.updatedAt)) {
+        final localUpdatedAt = localWork?.updatedAt;
+        final remoteUpdatedAt = work.updatedAt;
+        if (localWork == null ||
+            (localUpdatedAt != null &&
+                remoteUpdatedAt != null &&
+                localUpdatedAt.isBefore(remoteUpdatedAt))) {
           await _localDb.insertWork(work);
         }
       } catch (e) {
-        print('Failed to sync work ${doc.id}: $e');
+        debugPrint('Failed to sync work ${doc.id}: $e');
       }
     }
   }
@@ -255,7 +257,7 @@ class FirestoreLibraryRepository implements LibraryRepository {
             .set(entryFS.toJson());
       } catch (e) {
         // TODO: Add to retry queue
-        print('Failed to sync to Firestore: $e');
+        debugPrint('Failed to sync to Firestore: $e');
       }
     });
   }
@@ -265,7 +267,7 @@ class FirestoreLibraryRepository implements LibraryRepository {
     return UserLibraryEntryFS(
       workId: work.id,
       title: work.title,
-      author: work.author,
+      author: work.author ?? '',
       status: 'toRead', // TODO: Map from ReadingStatus enum
       currentPage: null, // TODO: Get from UserLibraryEntries
       personalRating: null,
@@ -283,7 +285,9 @@ class FirestoreLibraryRepository implements LibraryRepository {
       id: entryFS.workId,
       title: entryFS.title,
       author: entryFS.author,
-      subjectTags: [],
+      authorIds: const [],
+      subjectTags: const [],
+      categories: const [],
       synthetic: false,
       createdAt: entryFS.createdAt,
       updatedAt: entryFS.updatedAt,

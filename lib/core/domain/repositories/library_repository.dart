@@ -54,10 +54,7 @@ abstract class LibraryRepository {
   });
 
   /// Remove a book from the library
-  Future<void> removeBook({
-    required String userId,
-    required String workId,
-  });
+  Future<void> removeBook({required String userId, required String workId});
 
   /// Sync local database with cloud Firestore
   /// Called on app startup and when coming back online

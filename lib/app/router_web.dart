@@ -25,15 +25,10 @@ GoRouter router(Ref ref) {
         builder: (context, state) => const SearchScreen(),
       ),
       // Redirect all other paths to search
-      GoRoute(
-        path: '/',
-        redirect: (context, state) => '/search',
-      ),
+      GoRoute(path: '/', redirect: (context, state) => '/search'),
     ],
     errorBuilder: (context, state) => Scaffold(
-      appBar: AppBar(
-        title: const Text('BooksTrack'),
-      ),
+      appBar: AppBar(title: const Text('BooksTrack')),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

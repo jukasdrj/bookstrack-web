@@ -360,7 +360,6 @@ class SearchResponse {
   });
 }
 
-
 /// Batch enrichment response from BendV3 API.
 ///
 /// Used by [BendV3Service.enrichBooks] to separate successful lookups
@@ -393,10 +392,7 @@ class EnrichResponse {
   /// ISBNs not found in the database
   final List<String> notFound;
 
-  EnrichResponse({
-    required this.found,
-    required this.notFound,
-  });
+  EnrichResponse({required this.found, required this.notFound});
 }
 
 /// Riverpod provider for BendV3Service

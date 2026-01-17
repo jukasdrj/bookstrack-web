@@ -5,6 +5,7 @@ import '../features/library/screens/library_screen.dart';
 import '../features/search/screens/search_screen.dart';
 import '../features/scanner/screens/scanner_screen.dart';
 import '../features/insights/screens/insights_screen.dart';
+import '../features/review_queue/screens/review_queue_screen.dart';
 import '../shared/widgets/layouts/main_scaffold.dart';
 
 part 'router.g.dart';
@@ -12,7 +13,7 @@ part 'router.g.dart';
 /// App-wide routing configuration using go_router
 /// Uses StatefulShellRoute for persistent tab navigation state
 @riverpod
-GoRouter router(RouterRef ref) {
+GoRouter router(Ref ref) {
   return GoRouter(
     initialLocation: '/library',
     routes: [
@@ -58,6 +59,11 @@ GoRouter router(RouterRef ref) {
             ],
           ),
         ],
+      ),
+      // Review Queue Screen (Non-tab route, or can be added to a tab if desired, but here specific route)
+      GoRoute(
+        path: '/review',
+        builder: (context, state) => const ReviewQueueScreen(),
       ),
     ],
   );

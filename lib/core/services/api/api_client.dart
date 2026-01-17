@@ -8,8 +8,9 @@ class ApiClient {
       BaseOptions(
         baseUrl: 'https://api.oooefam.net', // Production BooksTrack API
         connectTimeout: const Duration(seconds: 10),
-        receiveTimeout:
-            const Duration(seconds: 60), // Allow for AI processing (25-40s)
+        receiveTimeout: const Duration(
+          seconds: 60,
+        ), // Allow for AI processing (25-40s)
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -45,7 +46,8 @@ class _LoggingInterceptor extends Interceptor {
   void onResponse(Response response, ResponseInterceptorHandler handler) {
     if (kDebugMode) {
       debugPrint(
-          '✅ RESPONSE: ${response.statusCode} ${response.requestOptions.uri}');
+        '✅ RESPONSE: ${response.statusCode} ${response.requestOptions.uri}',
+      );
     }
     super.onResponse(response, handler);
   }
@@ -56,7 +58,8 @@ class _LoggingInterceptor extends Interceptor {
       debugPrint('❌ ERROR: ${err.type} ${err.message}');
       if (err.response != null) {
         debugPrint(
-            '📥 RESPONSE: ${err.response?.statusCode} ${err.response?.data}');
+          '📥 RESPONSE: ${err.response?.statusCode} ${err.response?.data}',
+        );
       }
     }
     super.onError(err, handler);
@@ -135,13 +138,13 @@ class _RetryInterceptor extends Interceptor {
   void onError(DioException err, ErrorInterceptorHandler handler) async {
     if (_shouldRetry(err)) {
       final requestOptions = err.requestOptions;
-      final retryCount = requestOptions.extra['retryCount'] ?? 0;
+      final retryCount = (requestOptions.extra['retryCount'] as int?) ?? 0;
 
       if (retryCount < maxRetries) {
         requestOptions.extra['retryCount'] = retryCount + 1;
 
         // Exponential backoff
-        final delay = Duration(milliseconds: (500 * (retryCount + 1)).toInt());
+        final delay = Duration(milliseconds: 500 * (retryCount + 1));
 
         await Future.delayed(delay);
 

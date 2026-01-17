@@ -8,7 +8,7 @@ part 'user_profile_fs.g.dart';
 /// Firestore model for user profile
 /// Stored at: users/{userId}/profile
 @freezed
-class UserProfileFS with _$UserProfileFS {
+sealed class UserProfileFS with _$UserProfileFS {
   const factory UserProfileFS({
     required String email,
     String? displayName,

@@ -6,7 +6,7 @@ import 'package:uuid/uuid.dart' as uuid;
 import '../models/enums/data_provider.dart';
 
 // Conditional imports for platform-specific database implementations
-import 'package:drift/web.dart';  // Web-specific Drift
+import 'package:drift/web.dart'; // Web-specific Drift
 
 part 'database.g.dart';
 

@@ -10,9 +10,7 @@ class InsightsScreen extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Insights'),
-      ),
+      appBar: AppBar(title: const Text('Insights')),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(32.0),
@@ -22,13 +20,10 @@ class InsightsScreen extends StatelessWidget {
               Icon(
                 Icons.insights,
                 size: 80,
-                color: theme.colorScheme.primary.withOpacity(0.5),
+                color: theme.colorScheme.primary.withValues(alpha: 0.5),
               ),
               const SizedBox(height: 16),
-              Text(
-                'Reading Insights',
-                style: theme.textTheme.headlineSmall,
-              ),
+              Text('Reading Insights', style: theme.textTheme.headlineSmall),
               const SizedBox(height: 8),
               Text(
                 'Coming soon: Reading statistics, genre analysis, and diversity insights',

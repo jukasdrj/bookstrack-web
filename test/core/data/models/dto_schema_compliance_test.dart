@@ -29,7 +29,8 @@ void main() {
     });
 
     test('BookSchema matches Book DTO fields', () {
-      final bookSchema = bendv3Schemas['schemas']['Book'];
+      final bookSchema =
+          bendv3Schemas['schemas']['Book'] as Map<String, dynamic>;
       final properties = bookSchema['properties'] as Map<String, dynamic>;
       final required = (bookSchema['required'] as List?)?.cast<String>() ?? [];
 
@@ -200,10 +201,7 @@ void main() {
       });
 
       test('Array fields default to empty lists', () {
-        final workJson = {
-          'id': 'test-id',
-          'title': 'Test',
-        };
+        final workJson = {'id': 'test-id', 'title': 'Test'};
 
         final work = WorkDTO.fromJson(workJson);
         expect(work.authorIds, isEmpty);

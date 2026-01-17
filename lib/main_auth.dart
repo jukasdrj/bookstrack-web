@@ -162,16 +162,16 @@ class _LoginPageState extends State<LoginPage> {
                 Text(
                   'BooksTrack',
                   style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.primary,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Track your reading journey',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
                 const SizedBox(height: 48),
                 Card(
@@ -297,8 +297,8 @@ class HomePage extends StatelessWidget {
                 child: Text(
                   user.email?[0].toUpperCase() ?? 'U',
                   style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.onPrimaryContainer,
-                      ),
+                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
@@ -310,8 +310,8 @@ class HomePage extends StatelessWidget {
               Text(
                 user.email ?? 'User',
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
               const SizedBox(height: 48),
               Container(
@@ -322,10 +322,7 @@ class HomePage extends StatelessWidget {
                     padding: const EdgeInsets.all(24),
                     child: Column(
                       children: [
-                        const Icon(
-                          Icons.construction,
-                          size: 48,
-                        ),
+                        const Icon(Icons.construction, size: 48),
                         const SizedBox(height: 16),
                         Text(
                           'Features Coming Soon',
@@ -394,11 +391,7 @@ class _FeatureItem extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            icon,
-            size: 24,
-            color: Theme.of(context).colorScheme.primary,
-          ),
+          Icon(icon, size: 24, color: Theme.of(context).colorScheme.primary),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -409,10 +402,7 @@ class _FeatureItem extends StatelessWidget {
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  description,
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
+                Text(description, style: Theme.of(context).textTheme.bodySmall),
               ],
             ),
           ),

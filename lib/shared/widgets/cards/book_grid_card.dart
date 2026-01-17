@@ -7,11 +7,7 @@ class BookGridCard extends StatelessWidget {
   final WorkWithLibraryStatus bookData;
   final VoidCallback? onTap;
 
-  const BookGridCard({
-    super.key,
-    required this.bookData,
-    this.onTap,
-  });
+  const BookGridCard({super.key, required this.bookData, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -26,10 +22,7 @@ class BookGridCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // Book Cover (larger in grid view)
-            Expanded(
-              flex: 3,
-              child: _buildCoverImage(colorScheme),
-            ),
+            Expanded(flex: 3, child: _buildCoverImage(colorScheme)),
 
             // Book Info
             Expanded(
@@ -67,7 +60,7 @@ class BookGridCard extends StatelessWidget {
                       children: [
                         _buildStatusDot(colorScheme),
                         const Spacer(),
-                        if (bookData.libraryEntry.personalRating != null)
+                        if (bookData.libraryEntry?.personalRating != null)
                           _buildCompactRating(theme),
                       ],
                     ),
@@ -106,38 +99,28 @@ class BookGridCard extends StatelessWidget {
 
   Widget _buildPlaceholder(ColorScheme colorScheme) {
     return Center(
-      child: Icon(
-        Icons.book,
-        size: 48,
-        color: colorScheme.onSurfaceVariant,
-      ),
+      child: Icon(Icons.book, size: 48, color: colorScheme.onSurfaceVariant),
     );
   }
 
   Widget _buildStatusDot(ColorScheme colorScheme) {
-    final statusColor = _getStatusColor(bookData.status);
+    final status = bookData.status;
+    final statusColor = status != null ? _getStatusColor(status) : Colors.grey;
 
     return Container(
       width: 8,
       height: 8,
-      decoration: BoxDecoration(
-        color: statusColor,
-        shape: BoxShape.circle,
-      ),
+      decoration: BoxDecoration(color: statusColor, shape: BoxShape.circle),
     );
   }
 
   Widget _buildCompactRating(ThemeData theme) {
-    final rating = bookData.libraryEntry.personalRating!;
+    final rating = bookData.libraryEntry?.personalRating ?? 0;
 
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(
-          Icons.star,
-          size: 12,
-          color: theme.colorScheme.primary,
-        ),
+        Icon(Icons.star, size: 12, color: theme.colorScheme.primary),
         const SizedBox(width: 2),
         Text(
           rating.toString(),

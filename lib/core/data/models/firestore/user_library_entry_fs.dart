@@ -7,7 +7,7 @@ part 'user_library_entry_fs.g.dart';
 /// Firestore model for user library entries
 /// Stored at: users/{userId}/library/{workId}
 @freezed
-class UserLibraryEntryFS with _$UserLibraryEntryFS {
+sealed class UserLibraryEntryFS with _$UserLibraryEntryFS {
   const factory UserLibraryEntryFS({
     required String workId,
     required String title,

@@ -90,10 +90,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                           selected: isSelected,
                           onSelected: (_) => _onScopeSelected(scope),
                           avatar: !isSelected
-                              ? Icon(
-                                  _getScopeIcon(scope),
-                                  size: 18,
-                                )
+                              ? Icon(_getScopeIcon(scope), size: 18)
                               : null,
                         ),
                       );
@@ -119,13 +116,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       initial: () => _buildInitialState(),
       loading: (query, scope) => _buildLoadingState(query, scope),
       results: (query, scope, books, cached, totalResults) =>
-          _buildResultsState(
-        query,
-        scope,
-        books,
-        cached,
-        totalResults,
-      ),
+          _buildResultsState(query, scope, books, cached, totalResults),
       empty: (query, scope, message) => _buildEmptyState(query, scope, message),
       error: (query, scope, message, errorCode) =>
           _buildErrorState(query, scope, message),
@@ -146,10 +137,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               color: theme.colorScheme.primary.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
-            Text(
-              'Search for Books',
-              style: theme.textTheme.headlineSmall,
-            ),
+            Text('Search for Books', style: theme.textTheme.headlineSmall),
             const SizedBox(height: 8),
             Text(
               'Search by title, author, or scan an ISBN barcode to find books',
@@ -255,10 +243,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
-            Text(
-              'No Results Found',
-              style: theme.textTheme.headlineSmall,
-            ),
+            Text('No Results Found', style: theme.textTheme.headlineSmall),
             const SizedBox(height: 8),
             Text(
               message,

@@ -8,7 +8,7 @@ part 'edition_fs.g.dart';
 /// Firestore model for book editions
 /// Stored at: users/{userId}/editions/{editionId}
 @freezed
-class EditionFS with _$EditionFS {
+sealed class EditionFS with _$EditionFS {
   const factory EditionFS({
     required String id,
     required String workId,

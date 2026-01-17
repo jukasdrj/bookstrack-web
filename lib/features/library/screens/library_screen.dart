@@ -1,9 +1,10 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:books_tracker/core/data/database/database.dart';
 import 'package:books_tracker/shared/widgets/cards/book_card.dart';
 import 'package:books_tracker/shared/widgets/cards/book_grid_card.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
 import '../providers/library_providers.dart';
 
 /// Library Screen - Main screen showing user's book collection
@@ -16,6 +17,7 @@ class LibraryScreen extends ConsumerStatefulWidget {
 
 class _LibraryScreenState extends ConsumerState<LibraryScreen> {
   bool _isGridView = false;
+  bool _isSearching = false;
 
   @override
   Widget build(BuildContext context) {
@@ -25,8 +27,33 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Library'),
+        title: _isSearching
+            ? TextField(
+                autofocus: true,
+                decoration: const InputDecoration(
+                  hintText: 'Search library...',
+                  border: InputBorder.none,
+                ),
+                onChanged: (value) {
+                  ref.read(librarySearchQueryProvider.notifier).setQuery(value);
+                },
+              )
+            : const Text('Library'),
         actions: [
+          // Search toggle
+          IconButton(
+            icon: Icon(_isSearching ? Icons.close : Icons.search),
+            onPressed: () {
+              setState(() {
+                _isSearching = !_isSearching;
+                if (!_isSearching) {
+                  // Clear search when closing
+                  ref.read(librarySearchQueryProvider.notifier).setQuery('');
+                }
+              });
+            },
+            tooltip: _isSearching ? 'Close search' : 'Search library',
+          ),
           // View toggle
           IconButton(
             icon: Icon(_isGridView ? Icons.view_list : Icons.grid_view),
@@ -54,9 +81,8 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
           return _isGridView ? _buildGridView(books) : _buildListView(books);
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(
-          child: Text('Error loading library: $error'),
-        ),
+        error: (error, stack) =>
+            Center(child: Text('Error loading library: $error')),
       ),
     );
   }
@@ -66,7 +92,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
       icon: const Icon(Icons.sort),
       tooltip: 'Sort by',
       onSelected: (sortBy) {
-        ref.read(librarySortOptionProvider.notifier).setSort(sortBy);
+        ref.read(librarySortOptionProvider.notifier).setSortBy(sortBy);
       },
       itemBuilder: (context) => [
         _buildSortMenuItem(SortBy.recentlyAdded, 'Recently Added', currentSort),
@@ -175,12 +201,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
       selected: isSelected,
       onSelected: (_) => onSelected(),
       selectedColor: theme.colorScheme.primaryContainer,
-      avatar: icon != null && !isSelected
-          ? Icon(
-              icon,
-              size: 18,
-            )
-          : null,
+      avatar: icon != null && !isSelected ? Icon(icon, size: 18) : null,
     );
   }
 
@@ -237,13 +258,10 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
             Icon(
               Icons.auto_stories_outlined,
               size: 80,
-              color: theme.colorScheme.primary.withOpacity(0.5),
+              color: theme.colorScheme.primary.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
-            Text(
-              'Your library is empty',
-              style: theme.textTheme.headlineSmall,
-            ),
+            Text('Your library is empty', style: theme.textTheme.headlineSmall),
             const SizedBox(height: 8),
             Text(
               'Start adding books to track your reading journey',

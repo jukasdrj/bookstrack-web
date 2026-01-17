@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:drift/drift.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../database/database.dart';
+import '../../data/database/database.dart';
 
 /// Firebase Firestore Sync Service
 /// Syncs local Drift database with cloud Firestore for backup/multi-device sync
@@ -89,16 +89,21 @@ class FirebaseSyncService {
   Map<String, dynamic> _workToFirestore(Work work) {
     return {
       'title': work.title,
+      'subtitle': work.subtitle,
       'author': work.author,
+      'description': work.description,
       'subjectTags': work.subjectTags,
       'reviewStatus': work.reviewStatus,
       'synthetic': work.synthetic,
-      'primaryProvider': work.primaryProvider,
-      'contributors': work.contributors,
-      'googleBooksVolumeIDs': work.googleBooksVolumeIDs,
-      'openLibraryWorkID': work.openLibraryWorkID,
-      'createdAt': Timestamp.fromDate(work.createdAt),
-      'updatedAt': Timestamp.fromDate(work.updatedAt),
+      'workKey': work.workKey,
+      'qualityScore': work.qualityScore,
+      'categories': work.categories,
+      'createdAt': work.createdAt != null
+          ? Timestamp.fromDate(work.createdAt!)
+          : null,
+      'updatedAt': work.updatedAt != null
+          ? Timestamp.fromDate(work.updatedAt!)
+          : null,
     };
   }
 
@@ -108,19 +113,21 @@ class FirebaseSyncService {
       id: data['id'] as String,
       title: data['title'] as String,
       author: Value(data['author'] as String?),
-      subjectTags: Value((data['subjectTags'] as List?)?.cast<String>() ?? []),
-      reviewStatus:
-          Value(ReviewStatus.values[data['reviewStatus'] as int? ?? 0]),
+      subtitle: Value(data['subtitle'] as String?),
+      description: Value(data['description'] as String?),
+      subjectTags: (data['subjectTags'] as List?)?.cast<String>() ?? [],
+      authorIds: (data['authorIds'] as List?)?.cast<String>() ?? [],
       synthetic: Value(data['synthetic'] as bool? ?? false),
-      primaryProvider: Value(data['primaryProvider'] as String?),
-      contributors: Value((data['contributors'] as List?)?.cast<String>()),
-      googleBooksVolumeIDs:
-          Value((data['googleBooksVolumeIDs'] as List?)?.cast<String>()),
-      openLibraryWorkID: Value(data['openLibraryWorkID'] as String?),
-      createdAt:
-          Value((data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now()),
-      updatedAt:
-          Value((data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now()),
+      reviewStatus: Value(data['reviewStatus'] as String?),
+      workKey: Value(data['workKey'] as String?),
+      qualityScore: Value(data['qualityScore'] as int?),
+      categories: (data['categories'] as List?)?.cast<String>() ?? [],
+      createdAt: Value(
+        (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      ),
+      updatedAt: Value(
+        (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      ),
     );
   }
 }

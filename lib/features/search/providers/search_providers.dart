@@ -45,10 +45,7 @@ class Search extends _$Search {
     final trimmedQuery = query.trim();
 
     // Set loading state
-    state = SearchState.loading(
-      query: trimmedQuery,
-      scope: scope,
-    );
+    state = SearchState.loading(query: trimmedQuery, scope: scope);
 
     try {
       final searchService = ref.read(searchServiceProvider);
@@ -184,10 +181,7 @@ class Search extends _$Search {
   void retry() {
     final currentState = state;
     if (currentState is SearchStateError) {
-      search(
-        query: currentState.query,
-        scope: currentState.scope,
-      );
+      search(query: currentState.query, scope: currentState.scope);
     }
   }
 }
@@ -205,10 +199,9 @@ SearchState searchWithQuery(Ref ref) {
       // Simple debouncing - cancel previous search
       Future.delayed(const Duration(milliseconds: 300), () {
         if (ref.read(searchQueryProvider) == next) {
-          ref.read(searchProvider.notifier).search(
-                query: next,
-                scope: ref.read(searchScopeProvider),
-              );
+          ref
+              .read(searchProvider.notifier)
+              .search(query: next, scope: ref.read(searchScopeProvider));
         }
       });
     }

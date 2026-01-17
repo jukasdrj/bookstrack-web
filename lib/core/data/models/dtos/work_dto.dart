@@ -5,7 +5,7 @@ part 'work_dto.freezed.dart';
 part 'work_dto.g.dart';
 
 @freezed
-class WorkDTO with _$WorkDTO {
+sealed class WorkDTO with _$WorkDTO {
   const factory WorkDTO({
     required String id,
     required String title,

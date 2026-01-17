@@ -67,6 +67,9 @@ class DTOMapper {
   ///
   /// **Transaction:** Each book result is inserted in its own transaction
   /// (work + authors + relationships + edition).
+  // TODO: Update this method to work with BookDTO instead of BookResult
+  // Temporarily commented out to allow testing of search functionality
+  /*
   static Future<List<Work>> mapAndInsertSearchResponse(
     SearchResponse searchResponse,
     AppDatabase database,
@@ -137,6 +140,7 @@ class DTOMapper {
 
     return insertedWorks;
   }
+  */
 
   /// Converts a [WorkDTO] to a Drift [WorksCompanion] for database insertion.
   ///
@@ -258,17 +262,19 @@ class DTOMapper {
   /// - [Work] if a book with this ISBN exists
   /// - `null` if no match found
   static Future<Work?> _findWorkByISBN(
-      String isbn, AppDatabase database) async {
+    String isbn,
+    AppDatabase database,
+  ) async {
     // Find edition with this ISBN
-    final edition = await (database.select(database.editions)
-          ..where((t) => t.isbn.equals(isbn)))
-        .getSingleOrNull();
+    final edition = await (database.select(
+      database.editions,
+    )..where((t) => t.isbn.equals(isbn))).getSingleOrNull();
 
     if (edition == null) return null;
 
     // Get the work for this edition
-    return await (database.select(database.works)
-          ..where((t) => t.id.equals(edition.workId)))
-        .getSingleOrNull();
+    return await (database.select(
+      database.works,
+    )..where((t) => t.id.equals(edition.workId))).getSingleOrNull();
   }
 }

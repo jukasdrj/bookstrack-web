@@ -62,7 +62,8 @@ class BookSearchResultCard extends StatelessWidget {
                     ],
 
                     // Edition Details
-                    if (book.publishedDate != null || book.publisher != null) ...[
+                    if (book.publishedDate != null ||
+                        book.publisher != null) ...[
                       const SizedBox(height: 4),
                       Row(
                         children: [
@@ -73,7 +74,8 @@ class BookSearchResultCard extends StatelessWidget {
                                 color: colorScheme.onSurfaceVariant,
                               ),
                             ),
-                          if (book.publishedDate != null && book.publisher != null)
+                          if (book.publishedDate != null &&
+                              book.publisher != null)
                             Text(' • ', style: theme.textTheme.bodySmall),
                           if (book.publisher != null)
                             Expanded(
@@ -127,7 +129,8 @@ class BookSearchResultCard extends StatelessWidget {
 
   Widget _buildCover(ColorScheme colorScheme) {
     // Use coverUrls.small for thumbnails if available, otherwise fall back to coverUrl
-    final coverUrl = book.coverUrls?.small ?? book.coverUrl ?? book.thumbnailUrl;
+    final coverUrl =
+        book.coverUrls?.small ?? book.coverUrl ?? book.thumbnailUrl;
 
     return Container(
       width: 60,
@@ -149,9 +152,7 @@ class BookSearchResultCard extends StatelessWidget {
                   child: SizedBox(
                     width: 20,
                     height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                    ),
+                    child: CircularProgressIndicator(strokeWidth: 2),
                   ),
                 ),
               ),

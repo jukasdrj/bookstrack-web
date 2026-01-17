@@ -37,10 +37,7 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('BooksTrack'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('BooksTrack'), centerTitle: true),
       body: Center(
         child: SingleChildScrollView(
           child: Column(
@@ -55,16 +52,16 @@ class HomePage extends StatelessWidget {
               Text(
                 'BooksTrack Web',
                 style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  color: Theme.of(context).colorScheme.primary,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 16),
               Text(
                 'AI-Powered Book Tracking',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
               const SizedBox(height: 48),
               Container(
@@ -75,10 +72,7 @@ class HomePage extends StatelessWidget {
                     padding: const EdgeInsets.all(24),
                     child: Column(
                       children: [
-                        const Icon(
-                          Icons.construction,
-                          size: 48,
-                        ),
+                        const Icon(Icons.construction, size: 48),
                         const SizedBox(height: 16),
                         Text(
                           'Web Version Coming Soon',
@@ -153,11 +147,7 @@ class _FeatureItem extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            icon,
-            size: 24,
-            color: Theme.of(context).colorScheme.primary,
-          ),
+          Icon(icon, size: 24, color: Theme.of(context).colorScheme.primary),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -168,10 +158,7 @@ class _FeatureItem extends StatelessWidget {
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  description,
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
+                Text(description, style: Theme.of(context).textTheme.bodySmall),
               ],
             ),
           ),

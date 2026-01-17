@@ -4,7 +4,7 @@ part 'author_dto.freezed.dart';
 part 'author_dto.g.dart';
 
 @freezed
-class AuthorDTO with _$AuthorDTO {
+sealed class AuthorDTO with _$AuthorDTO {
   const factory AuthorDTO({
     required String id,
     required String name,

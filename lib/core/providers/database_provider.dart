@@ -35,8 +35,12 @@ final watchReviewQueueProvider = FutureProvider<List<DetectedItem>>((ref) {
 });
 
 /// Provider for searching works in the library
-final searchWorksProvider = FutureProvider.family<List<WorkWithLibraryStatus>, String>((ref, query) async {
-  final db = ref.watch(databaseProvider);
-  final entries = await db.watchLibrary(searchQuery: query).first;
-  return entries;
-});
+final searchWorksProvider =
+    FutureProvider.family<List<WorkWithLibraryStatus>, String>((
+      ref,
+      query,
+    ) async {
+      final db = ref.watch(databaseProvider);
+      final entries = await db.watchLibrary(searchQuery: query).first;
+      return entries;
+    });

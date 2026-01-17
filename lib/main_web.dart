@@ -32,13 +32,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize Firebase (required for Firestore)
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  runApp(
-    const ProviderScope(
-      child: BooksAppWeb(),
-    ),
-  );
+  runApp(const ProviderScope(child: BooksAppWeb()));
 }

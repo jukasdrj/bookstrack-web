@@ -4,7 +4,7 @@ part 'edition_dto.freezed.dart';
 part 'edition_dto.g.dart';
 
 @freezed
-class EditionDTO with _$EditionDTO {
+sealed class EditionDTO with _$EditionDTO {
   const factory EditionDTO({
     required String id,
     required String workId,
