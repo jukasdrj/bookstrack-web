@@ -1,0 +1,48 @@
+{
+  "//": "Cloudflare Pages Configuration for BooksTrack Web",
+  "//": "This file documents the configuration used in Cloudflare Pages dashboard",
+  "//": "Note: Cloudflare Pages doesn't use this file directly - configure in dashboard",
+
+  "project_name": "bookstrack-web",
+  "production_branch": "main",
+
+  "build_settings": {
+    "framework": "flutter",
+    "build_command": "flutter build web --release",
+    "build_output_directory": "build/web",
+    "root_directory": "",
+    "node_version": "18",
+    "environment_variables": {
+      "FLUTTER_VERSION": "3.38.7"
+    }
+  },
+
+  "deployment": {
+    "production_domain": "books.oooefam.net",
+    "preview_domains": [
+      "*.bookstrack-web.pages.dev"
+    ]
+  },
+
+  "routes": {
+    "//": "Custom routing rules (configure in Pages dashboard)",
+    "rewrites": [],
+    "redirects": []
+  },
+
+  "integration": {
+    "backend_api": {
+      "url": "https://api.oooefam.net",
+      "zone": "oooefam.net",
+      "worker": "api-worker",
+      "description": "BendV3 API with Alexandria datastore"
+    }
+  },
+
+  "notes": {
+    "flutter_web": "Uses IndexedDB for local database (drift/web.dart)",
+    "api_integration": "Fully integrated with BendV3 v3 API",
+    "cors": "CORS should be configured on api.oooefam.net for books.oooefam.net origin",
+    "build_time": "~1-2 minutes for full Flutter web build"
+  }
+}
