@@ -1,22 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import '../../../core/data/models/dtos/work_dto.dart';
-import '../../../core/data/models/dtos/edition_dto.dart';
-import '../../../core/data/models/dtos/author_dto.dart';
+import '../../../core/data/models/dtos/book_dto.dart';
 
 /// Card displaying a single search result for a book
 class BookSearchResultCard extends StatelessWidget {
-  final WorkDTO work;
-  final EditionDTO? edition;
-  final List<AuthorDTO> authors;
+  final BookDTO book;
   final VoidCallback? onTap;
   final VoidCallback? onAddToLibrary;
 
   const BookSearchResultCard({
     super.key,
-    required this.work,
-    this.edition,
-    required this.authors,
+    required this.book,
     this.onTap,
     this.onAddToLibrary,
   });
@@ -46,7 +40,7 @@ class BookSearchResultCard extends StatelessWidget {
                   children: [
                     // Title
                     Text(
-                      work.title,
+                      book.title,
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
@@ -54,11 +48,11 @@ class BookSearchResultCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
 
-                    if (authors.isNotEmpty) ...[
+                    if (book.authors.isNotEmpty) ...[
                       const SizedBox(height: 4),
                       // Authors
                       Text(
-                        _formatAuthors(authors),
+                        _formatAuthors(book.authors),
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: colorScheme.onSurfaceVariant,
                         ),
@@ -67,25 +61,24 @@ class BookSearchResultCard extends StatelessWidget {
                       ),
                     ],
 
-                    if (edition != null) ...[
+                    // Edition Details
+                    if (book.publishedDate != null || book.publisher != null) ...[
                       const SizedBox(height: 4),
-                      // Edition Details
                       Row(
                         children: [
-                          if (edition!.publishedYear != null)
+                          if (book.publishedDate != null)
                             Text(
-                              '${edition!.publishedYear}',
+                              _formatPublishedDate(book.publishedDate!),
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: colorScheme.onSurfaceVariant,
                               ),
                             ),
-                          if (edition!.publishedYear != null &&
-                              edition!.publisher != null)
+                          if (book.publishedDate != null && book.publisher != null)
                             Text(' • ', style: theme.textTheme.bodySmall),
-                          if (edition!.publisher != null)
+                          if (book.publisher != null)
                             Expanded(
                               child: Text(
-                                edition!.publisher!,
+                                book.publisher!,
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   color: colorScheme.onSurfaceVariant,
                                 ),
@@ -97,10 +90,10 @@ class BookSearchResultCard extends StatelessWidget {
                       ),
                     ],
 
-                    if (edition?.isbn != null) ...[
+                    if (book.isbn.isNotEmpty) ...[
                       const SizedBox(height: 2),
                       Text(
-                        'ISBN: ${edition!.isbn}',
+                        'ISBN: ${book.isbn}',
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: colorScheme.onSurfaceVariant,
                           fontFamily: 'monospace',
@@ -133,7 +126,8 @@ class BookSearchResultCard extends StatelessWidget {
   }
 
   Widget _buildCover(ColorScheme colorScheme) {
-    final coverUrl = edition?.coverImageURL;
+    // Use coverUrls.small for thumbnails if available, otherwise fall back to coverUrl
+    final coverUrl = book.coverUrls?.small ?? book.coverUrl ?? book.thumbnailUrl;
 
     return Container(
       width: 60,
@@ -151,15 +145,12 @@ class BookSearchResultCard extends StatelessWidget {
               memCacheHeight: 160, // 80 * 2
               placeholder: (context, url) => Container(
                 color: colorScheme.surfaceContainerHighest,
-                child: Center(
+                child: const Center(
                   child: SizedBox(
                     width: 20,
                     height: 20,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        colorScheme.onSurfaceVariant,
-                      ),
                     ),
                   ),
                 ),
@@ -184,12 +175,26 @@ class BookSearchResultCard extends StatelessWidget {
     );
   }
 
-  String _formatAuthors(List<AuthorDTO> authors) {
+  String _formatAuthors(List<String> authors) {
     if (authors.isEmpty) return 'Unknown Author';
-    if (authors.length == 1) return authors.first.name;
+    if (authors.length == 1) return authors.first;
     if (authors.length == 2) {
-      return '${authors.first.name} & ${authors.last.name}';
+      return '${authors.first} & ${authors.last}';
     }
-    return '${authors.first.name} & ${authors.length - 1} others';
+    return '${authors.first} & ${authors.length - 1} others';
+  }
+
+  String _formatPublishedDate(String dateString) {
+    // Handle partial dates like "1998" or full ISO dates like "1998-09-01"
+    if (dateString.length == 4) {
+      return dateString; // Just the year
+    }
+
+    try {
+      final date = DateTime.parse(dateString);
+      return '${date.year}';
+    } catch (_) {
+      return dateString; // Return as-is if parsing fails
+    }
   }
 }

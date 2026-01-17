@@ -1,36 +1,42 @@
-import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/database/database.dart';
 
-part 'database_provider.g.dart';
+/// Provider for the app database instance (no code gen needed)
+///
+/// **Web Platform:** Returns a stub/mock database since SQLite doesn't work on web.
+/// The app uses Firestore exclusively on web instead.
+///
+/// **Mobile/Desktop:** Returns full AppDatabase with Drift/SQLite.
+final databaseProvider = Provider<AppDatabase>((ref) {
+  if (kIsWeb) {
+    // On web, we can't use SQLite, so we throw if anyone tries to use it
+    // The app should use Firestore providers instead on web
+    throw UnimplementedError(
+      'Database not available on web. Use Firestore providers instead.',
+    );
+  }
 
-/// Provider for the app database instance
-@riverpod
-AppDatabase database(DatabaseRef ref) {
   final db = AppDatabase();
   ref.onDispose(() => db.close());
   return db;
-}
+});
 
-/// Provider that watches all works with their authors
-@riverpod
-Stream<List<WorkWithAuthors>> watchWorks(WatchWorksRef ref) {
+/// Provider that watches library works with their status
+final watchWorksProvider = StreamProvider<List<WorkWithLibraryStatus>>((ref) {
   final db = ref.watch(databaseProvider);
-  return db.watchAllWorks();
-}
+  return db.watchLibrary();
+});
 
-/// Provider that watches the review queue (works needing review)
-@riverpod
-Stream<List<Work>> watchReviewQueue(WatchReviewQueueRef ref) {
+/// Provider that watches the review queue (pending detected items)
+final watchReviewQueueProvider = FutureProvider<List<DetectedItem>>((ref) {
   final db = ref.watch(databaseProvider);
-  return db.watchReviewQueue();
-}
+  return db.getPendingReviewItems();
+});
 
-/// Provider for searching works
-@riverpod
-Future<List<WorkWithAuthors>> searchWorks(
-  SearchWorksRef ref,
-  String query,
-) async {
+/// Provider for searching works in the library
+final searchWorksProvider = FutureProvider.family<List<WorkWithLibraryStatus>, String>((ref, query) async {
   final db = ref.watch(databaseProvider);
-  return await db.searchWorks(query);
-}
+  final entries = await db.watchLibrary(searchQuery: query).first;
+  return entries;
+});

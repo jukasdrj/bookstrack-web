@@ -1,8 +1,18 @@
+import 'package:books_tracker/core/data/models/dtos/book_dto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
 import '../models/search_state.dart';
 import '../providers/search_providers.dart';
 import '../widgets/book_search_result_card.dart';
+
+// Helper to check canPop to assume GoRouter context logic if needed
+class CanPopHelper {
+  final BuildContext context;
+  CanPopHelper(this.context);
+  bool get canPop => Navigator.of(context).canPop();
+}
 
 /// Search Screen with multi-mode search capabilities
 /// Supports: Title, Author, ISBN search with barcode scanner integration
@@ -34,7 +44,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     final searchState = ref.watch(searchProvider);
-    final currentScope = ref.watch(searchScopeNotifierProvider);
+    final currentScope = ref.watch(searchScopeProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -108,9 +118,14 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     return searchState.when(
       initial: () => _buildInitialState(),
       loading: (query, scope) => _buildLoadingState(query, scope),
-      results: (query, scope, works, editions, authors, cached, totalResults) =>
+      results: (query, scope, books, cached, totalResults) =>
           _buildResultsState(
-              query, scope, works, editions, authors, cached, totalResults),
+        query,
+        scope,
+        books,
+        cached,
+        totalResults,
+      ),
       empty: (query, scope, message) => _buildEmptyState(query, scope, message),
       error: (query, scope, message, errorCode) =>
           _buildErrorState(query, scope, message),
@@ -180,9 +195,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   Widget _buildResultsState(
     String query,
     SearchScope scope,
-    List works,
-    List editions,
-    List authors,
+    List<BookDTO> books,
     bool cached,
     int totalResults,
   ) {
@@ -200,9 +213,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 ),
               ),
               if (cached)
-                Chip(
-                  label: const Text('Cached'),
-                  avatar: const Icon(Icons.offline_bolt, size: 16),
+                const Chip(
+                  label: Text('Cached'),
+                  avatar: Icon(Icons.offline_bolt, size: 16),
                   visualDensity: VisualDensity.compact,
                 ),
             ],
@@ -212,27 +225,14 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         // Results List
         Expanded(
           child: ListView.builder(
-            itemCount: works.length,
+            itemCount: books.length,
             itemBuilder: (context, index) {
-              final work = works[index];
-
-              // Find corresponding edition and authors for this work
-              final edition = editions.cast().firstWhere(
-                    (e) => e.workId == work.id,
-                    orElse: () => null,
-                  );
-
-              final workAuthors = authors
-                  .cast()
-                  .where((a) => work.authorIds?.contains(a.id) ?? false)
-                  .toList();
+              final book = books[index];
 
               return BookSearchResultCard(
-                work: work,
-                edition: edition,
-                authors: workAuthors,
-                onTap: () => _onBookTapped(work),
-                onAddToLibrary: () => _onAddToLibrary(work, edition),
+                book: book,
+                onTap: () => _onBookTapped(book),
+                onAddToLibrary: () => _onAddToLibrary(book),
               );
             },
           ),
@@ -331,7 +331,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   }
 
   void _onScopeSelected(SearchScope scope) {
-    ref.read(searchScopeNotifierProvider.notifier).setScope(scope);
+    ref.read(searchScopeProvider.notifier).setScope(scope);
     final currentQuery = _searchController.text.trim();
     if (currentQuery.isNotEmpty) {
       _performSearch(currentQuery);
@@ -339,7 +339,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   }
 
   void _performSearch(String query) {
-    final scope = ref.read(searchScopeNotifierProvider);
+    final scope = ref.read(searchScopeProvider);
     ref.read(searchProvider.notifier).search(query: query, scope: scope);
   }
 
@@ -350,26 +350,48 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     _searchFocusNode.requestFocus();
   }
 
-  void _onBookTapped(dynamic work) {
+  void _onBookTapped(BookDTO book) {
     // TODO: Navigate to book detail screen
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Book details for "${work.title}" coming soon!')),
+      SnackBar(content: Text('Book details for "${book.title}" coming soon!')),
     );
   }
 
-  void _onAddToLibrary(dynamic work, dynamic edition) {
-    // TODO: Add book to user's library
+  void _onAddToLibrary(BookDTO book) {
+    // TODO: Convert BookDTO to Work/Edition and add to library
+    // For now, show a placeholder message
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Adding "${book.title}" to library coming soon!')),
+    );
+
+    /* Future implementation - need to convert BookDTO to Work/Edition:
+    ref.read(libraryRepositoryProvider).addBookFromSearch(
+          work: work,
+          edition: edition,
+          status: ReadingStatus.toRead, // Default status
+        );
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Added "${work.title}" to library!'),
+        content: Text('Added "${book.title}" to library!'),
         action: SnackBarAction(
           label: 'View Library',
           onPressed: () {
-            // TODO: Navigate to library
+            // Navigate to library
+            // Assuming GoRouter usage or simple pop if search is opened from library
+            // But main nav is assumed here.
+            // If checking LibraryScreen code, it navigates to /search.
+            // So we might want to pop to go back to Library.
+            if (CanPopHelper(context).canPop) {
+              context.pop();
+            } else {
+              context.go('/');
+            }
           },
         ),
       ),
     );
+    */
   }
 
   void _openBarcodeScanner() {

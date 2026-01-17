@@ -1,7 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import '../../../core/data/models/dtos/work_dto.dart';
-import '../../../core/data/models/dtos/edition_dto.dart';
-import '../../../core/data/models/dtos/author_dto.dart';
+import '../../../core/data/models/dtos/book_dto.dart';
 
 part 'search_state.freezed.dart';
 
@@ -19,9 +17,7 @@ class SearchState with _$SearchState {
   const factory SearchState.results({
     required String query,
     required SearchScope scope,
-    required List<WorkDTO> works,
-    required List<EditionDTO> editions,
-    required List<AuthorDTO> authors,
+    required List<BookDTO> books,
     required bool cached,
     required int totalResults,
   }) = SearchStateResults;
@@ -49,7 +45,7 @@ extension SearchStateExtensions on SearchState {
   String get currentQuery => when(
         initial: () => '',
         loading: (query, _) => query,
-        results: (query, _, __, ___, ____, _____, ______) => query,
+        results: (query, _, __, ___, ____) => query,
         empty: (query, _, __) => query,
         error: (query, _, __, ___) => query,
       );
@@ -57,7 +53,7 @@ extension SearchStateExtensions on SearchState {
   SearchScope get currentScope => when(
         initial: () => SearchScope.title,
         loading: (_, scope) => scope,
-        results: (_, scope, __, ___, ____, _____, ______) => scope,
+        results: (_, scope, __, ___, ____) => scope,
         empty: (_, scope, __) => scope,
         error: (_, scope, __, ___) => scope,
       );

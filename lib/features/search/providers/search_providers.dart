@@ -101,7 +101,7 @@ class Search extends _$Search {
   Future<void> _searchByTitle(SearchService service, String query) async {
     final response = await service.searchByTitle(query);
 
-    if (response.data?.works.isEmpty ?? true) {
+    if (response.data?.books.isEmpty ?? true) {
       state = SearchState.empty(
         query: query,
         scope: SearchScope.title,
@@ -112,11 +112,9 @@ class Search extends _$Search {
       state = SearchState.results(
         query: query,
         scope: SearchScope.title,
-        works: data.works,
-        editions: data.editions,
-        authors: data.authors,
+        books: data.books,
         cached: response.meta.cached,
-        totalResults: data.works.length,
+        totalResults: data.total,
       );
     }
   }
@@ -124,7 +122,7 @@ class Search extends _$Search {
   Future<void> _searchByAuthor(SearchService service, String query) async {
     final response = await service.searchByAuthor(query);
 
-    if (response.data?.works.isEmpty ?? true) {
+    if (response.data?.books.isEmpty ?? true) {
       state = SearchState.empty(
         query: query,
         scope: SearchScope.author,
@@ -136,11 +134,9 @@ class Search extends _$Search {
       state = SearchState.results(
         query: query,
         scope: SearchScope.author,
-        works: data.works,
-        editions: data.editions,
-        authors: data.authors,
+        books: data.books,
         cached: response.meta.cached,
-        totalResults: data.works.length,
+        totalResults: data.total,
       );
     }
   }
@@ -160,7 +156,7 @@ class Search extends _$Search {
 
     final response = await service.searchByISBN(cleanISBN);
 
-    if (response.data?.works.isEmpty ?? true) {
+    if (response.data?.books.isEmpty ?? true) {
       state = SearchState.empty(
         query: query,
         scope: SearchScope.isbn,
@@ -172,11 +168,9 @@ class Search extends _$Search {
       state = SearchState.results(
         query: query,
         scope: SearchScope.isbn,
-        works: data.works,
-        editions: data.editions,
-        authors: data.authors,
+        books: data.books,
         cached: response.meta.cached,
-        totalResults: data.works.length,
+        totalResults: data.total,
       );
     }
   }
@@ -200,9 +194,9 @@ class Search extends _$Search {
 
 /// Combined search state provider for UI convenience
 @riverpod
-SearchState searchWithQuery(SearchWithQueryRef ref) {
+SearchState searchWithQuery(Ref ref) {
   final query = ref.watch(searchQueryProvider);
-  final scope = ref.watch(searchScopeNotifierProvider);
+  final scope = ref.watch(searchScopeProvider);
   final searchState = ref.watch(searchProvider);
 
   // Auto-trigger search when query changes (with debouncing)
@@ -213,7 +207,7 @@ SearchState searchWithQuery(SearchWithQueryRef ref) {
         if (ref.read(searchQueryProvider) == next) {
           ref.read(searchProvider.notifier).search(
                 query: next,
-                scope: ref.read(searchScopeNotifierProvider),
+                scope: ref.read(searchScopeProvider),
               );
         }
       });

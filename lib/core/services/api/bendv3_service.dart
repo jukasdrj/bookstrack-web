@@ -1,9 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../data/models/dtos/author_dto.dart';
-import '../../data/models/dtos/edition_dto.dart';
-import '../../data/models/dtos/work_dto.dart';
+import '../../data/models/dtos/book_dto.dart';
 
 part 'bendv3_service.g.dart';
 
@@ -90,14 +88,14 @@ class BendV3Service {
       if (response.statusCode == 200 && responseData['success'] == true) {
         final data = responseData['data'] as Map<String, dynamic>;
         final results = (data['results'] as List)
-            .map((json) => BookResult.fromJson(json as Map<String, dynamic>))
+            .map((json) => BookDTO.fromJson(json as Map<String, dynamic>))
             .toList();
 
         return SearchResponse(
           results: results,
-          total: data['total'] as int,
-          limit: data['limit'] as int,
-          offset: data['offset'] as int,
+          total: data['totalCount'] as int,
+          limit: data['query']['limit'] as int,
+          offset: data['query']['offset'] as int,
         );
       }
 
@@ -118,7 +116,7 @@ class BendV3Service {
   /// - [isbn] - ISBN-10 or ISBN-13 (with or without hyphens)
   ///
   /// **Returns:**
-  /// - [BookResult] if book found
+  /// - [BookDTO] if book found
   /// - `null` if ISBN not found (404 response)
   ///
   /// **Throws:**
@@ -129,12 +127,12 @@ class BendV3Service {
   /// ```dart
   /// final book = await service.getBookByIsbn('9780439708180');
   /// if (book != null) {
-  ///   print('Found: ${book.work.title}');
+  ///   print('Found: ${book.title}');
   /// } else {
   ///   print('Book not found in database');
   /// }
   /// ```
-  Future<BookResult?> getBookByIsbn(String isbn) async {
+  Future<BookDTO?> getBookByIsbn(String isbn) async {
     try {
       final response = await _dio.get<Map<String, dynamic>>(
         '$_baseUrl/books/$isbn',
@@ -143,7 +141,7 @@ class BendV3Service {
       final responseData = response.data!;
       if (response.statusCode == 200 && responseData['success'] == true) {
         final data = responseData['data'] as Map<String, dynamic>;
-        return BookResult.fromJson(data);
+        return BookDTO.fromJson(data);
       }
 
       return null;
@@ -166,7 +164,7 @@ class BendV3Service {
   /// - [isbns] - List of ISBN-10 or ISBN-13 strings (1-500 items)
   ///
   /// **Returns:** [EnrichResponse] with:
-  /// - `found` - List of [BookResult] objects for located books
+  /// - `found` - List of [BookDTO] objects for located books
   /// - `notFound` - List of ISBN strings not in the database
   ///
   /// **Throws:**
@@ -203,8 +201,8 @@ class BendV3Service {
       if (response.statusCode == 200 && responseData['success'] == true) {
         final data = responseData['data'] as Map<String, dynamic>;
         return EnrichResponse(
-          found: (data['found'] as List)
-              .map((json) => BookResult.fromJson(json as Map<String, dynamic>))
+          found: (data['books'] as List)
+              .map((json) => BookDTO.fromJson(json as Map<String, dynamic>))
               .toList(),
           notFound: (data['notFound'] as List).cast<String>(),
         );
@@ -228,7 +226,7 @@ class BendV3Service {
   /// - [limit] - Maximum number of recommendations (1-50), defaults to 10
   ///
   /// **Returns:**
-  /// - List of [BookResult] objects
+  /// - List of [BookDTO] objects
   /// - Empty list if endpoint not yet implemented (404)
   ///
   /// **Throws:**
@@ -244,11 +242,11 @@ class BendV3Service {
   /// if (recommendations.isNotEmpty) {
   ///   print('This week\\'s picks:');
   ///   for (final book in recommendations) {
-  ///     print('- ${book.work.title}');
+  ///     print('- ${book.title}');
   ///   }
   /// }
   /// ```
-  Future<List<BookResult>> getWeeklyRecommendations({int limit = 10}) async {
+  Future<List<BookDTO>> getWeeklyRecommendations({int limit = 10}) async {
     try {
       final response = await _dio.get<Map<String, dynamic>>(
         '$_baseUrl/recommendations/weekly',
@@ -260,7 +258,7 @@ class BendV3Service {
         final data = responseData['data'] as Map<String, dynamic>;
         final recommendations = data['recommendations'] as List;
         return recommendations
-            .map((json) => BookResult.fromJson(json as Map<String, dynamic>))
+            .map((json) => BookDTO.fromJson(json as Map<String, dynamic>))
             .toList();
       }
 
@@ -343,7 +341,7 @@ class BendV3Service {
 /// ```
 class SearchResponse {
   /// List of book results for this page
-  final List<BookResult> results;
+  final List<BookDTO> results;
 
   /// Total number of matching books across all pages
   final int total;
@@ -362,58 +360,6 @@ class SearchResponse {
   });
 }
 
-/// Combined book result from BendV3 API.
-///
-/// Represents a single book result containing:
-/// - **work** - Core book metadata (title, subject tags, quality score, etc.)
-/// - **edition** - Edition-specific details (ISBN, publisher, cover image, etc.)
-/// - **authors** - List of author information
-///
-/// BendV3 pre-joins work, edition, and author data in a single response object,
-/// eliminating the need for separate queries to fetch related data.
-///
-/// **Note:** [edition] may be null for books without ISBN-specific editions
-/// (e.g., works known only by title/author without a specific published edition).
-///
-/// **Example:**
-/// ```dart
-/// final book = await service.getBookByIsbn('9780439708180');
-/// print('Title: ${book.work.title}');
-/// print('Author: ${book.authors.map((a) => a.name).join(", ")}');
-/// if (book.edition != null) {
-///   print('Publisher: ${book.edition!.publisher}');
-///   print('ISBN: ${book.edition!.isbn}');
-/// }
-/// ```
-class BookResult {
-  /// Core book metadata (title, description, categories, etc.)
-  final WorkDTO work;
-
-  /// Edition-specific details (ISBN, publisher, cover, etc.)
-  /// May be null for works without a specific edition.
-  final EditionDTO? edition;
-
-  /// List of authors (empty if no author information available)
-  final List<AuthorDTO> authors;
-
-  BookResult({
-    required this.work,
-    this.edition,
-    required this.authors,
-  });
-
-  factory BookResult.fromJson(Map<String, dynamic> json) {
-    return BookResult(
-      work: WorkDTO.fromJson(json['work']),
-      edition:
-          json['edition'] != null ? EditionDTO.fromJson(json['edition']) : null,
-      authors: (json['authors'] as List?)
-              ?.map((a) => AuthorDTO.fromJson(a))
-              .toList() ??
-          [],
-    );
-  }
-}
 
 /// Batch enrichment response from BendV3 API.
 ///
@@ -429,7 +375,7 @@ class BookResult {
 ///
 /// // Process found books
 /// for (final book in response.found) {
-///   print('✓ ${book.work.title}');
+///   print('✓ ${book.title}');
 /// }
 ///
 /// // Log missing ISBNs
@@ -442,7 +388,7 @@ class BookResult {
 /// ```
 class EnrichResponse {
   /// Books successfully found in the database
-  final List<BookResult> found;
+  final List<BookDTO> found;
 
   /// ISBNs not found in the database
   final List<String> notFound;
@@ -455,7 +401,7 @@ class EnrichResponse {
 
 /// Riverpod provider for BendV3Service
 @riverpod
-BendV3Service bendV3Service(BendV3ServiceRef ref) {
+BendV3Service bendV3Service(Ref ref) {
   final dio = Dio(
     BaseOptions(
       connectTimeout: const Duration(seconds: 30),
