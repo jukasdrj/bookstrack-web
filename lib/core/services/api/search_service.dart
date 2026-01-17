@@ -52,8 +52,9 @@ class SearchService {
       // Filter results to only books where author name contains the query
       final queryLower = query.toLowerCase();
       final filteredBooks = response.results.where((book) {
-        return book.authors.any((author) =>
-            author.toLowerCase().contains(queryLower));
+        return book.authors.any(
+          (author) => author.toLowerCase().contains(queryLower),
+        );
       }).toList();
 
       return ResponseEnvelope(
@@ -131,7 +132,7 @@ class BendV3Service {
       '$_baseUrl/books/search',
       queryParameters: {
         'q': query,
-        'mode': type, // V3 uses 'mode' not 'type'
+        'mode': type, // V3 API uses 'mode' parameter
         'limit': limit,
         'offset': offset,
       },

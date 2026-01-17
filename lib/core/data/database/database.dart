@@ -1,13 +1,12 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:drift/drift.dart';
-import 'package:drift/native.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' as p;
 import 'package:uuid/uuid.dart' as uuid;
 
 import '../models/enums/data_provider.dart';
+
+// Conditional imports for platform-specific database implementations
+import 'package:drift/web.dart';  // Web-specific Drift
 
 part 'database.g.dart';
 
@@ -44,12 +43,7 @@ class DataProviderConverter extends TypeConverter<DataProvider?, String?> {
   }
 }
 
-enum ReadingStatus {
-  wishlist,
-  toRead,
-  reading,
-  read,
-}
+enum ReadingStatus { wishlist, toRead, reading, read }
 
 // Database Tables
 class Works extends Table {
@@ -128,6 +122,8 @@ class UserLibraryEntries extends Table {
   IntColumn get currentPage => integer().nullable()();
   IntColumn get personalRating => integer().nullable()();
   TextColumn get notes => text().nullable()();
+  DateTimeColumn get startedAt => dateTime().nullable()();
+  DateTimeColumn get finishedAt => dateTime().nullable()();
   DateTimeColumn get createdAt => dateTime().nullable()();
   DateTimeColumn get updatedAt => dateTime().nullable()();
 
@@ -167,15 +163,17 @@ class DetectedItems extends Table {
 }
 
 // Database Class
-@DriftDatabase(tables: [
-  Works,
-  Editions,
-  Authors,
-  WorkAuthors,
-  UserLibraryEntries,
-  ScanSessions,
-  DetectedItems,
-])
+@DriftDatabase(
+  tables: [
+    Works,
+    Editions,
+    Authors,
+    WorkAuthors,
+    UserLibraryEntries,
+    ScanSessions,
+    DetectedItems,
+  ],
+)
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
@@ -184,26 +182,60 @@ class AppDatabase extends _$AppDatabase {
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-        onCreate: (Migrator m) async {
-          await m.createAll();
-        },
-        onUpgrade: (Migrator m, int from, int to) async {
-          if (from < 5) {
-            // Migration from v4 to v5: Add new BendV3 v3.2.0 fields
-            // Since we're replacing placeholders, we'll recreate all tables
-            await m.createAll();
-          }
-        },
-      );
+    onCreate: (Migrator m) async {
+      await m.createAll();
+    },
+    onUpgrade: (Migrator m, int from, int to) async {
+      if (from < 5) {
+        // Migration from v4 to v5: Add new BendV3 v3.2.0 fields
+        // Since we're replacing placeholders, we'll recreate all tables
+        await m.createAll();
+      }
+    },
+  );
 
   // Helper method to watch library with filters
   Stream<List<WorkWithLibraryStatus>> watchLibrary({
     ReadingStatus? filterStatus,
+    String? searchQuery,
     String? cursor,
     int limit = 50,
   }) {
-    // Placeholder - will be implemented with proper query
-    return const Stream.empty();
+    final query = select(userLibraryEntries).join([
+      innerJoin(works, works.id.equalsExp(userLibraryEntries.workId)),
+      leftOuterJoin(
+        editions,
+        editions.id.equalsExp(userLibraryEntries.editionId),
+      ), // specific edition
+    ]);
+
+    if (filterStatus != null) {
+      query.where(userLibraryEntries.status.equals(filterStatus.index));
+    }
+
+    if (searchQuery != null && searchQuery.isNotEmpty) {
+      final term = '%$searchQuery%';
+      query.where(works.title.like(term) | works.author.like(term));
+    }
+
+    // Sort by most recently updated/added
+    query.orderBy([OrderingTerm.desc(userLibraryEntries.updatedAt)]);
+
+    if (limit > 0) {
+      query.limit(limit);
+    }
+
+    return query.map((row) {
+      final work = row.readTable(works);
+      final entry = row.readTable(userLibraryEntries);
+      final edition = row.readTableOrNull(editions);
+
+      return WorkWithLibraryStatus(
+        work: work,
+        libraryEntry: entry,
+        edition: edition,
+      );
+    }).watch();
   }
 
   // Get work by ID
@@ -217,12 +249,12 @@ class AppDatabase extends _$AppDatabase {
   }
 
   // Insert work (upsert)
-  Future<void> insertWork(Work work) async {
+  Future<void> insertWork(Insertable<Work> work) async {
     await into(works).insertOnConflictUpdate(work);
   }
 
   // Insert edition (upsert)
-  Future<void> insertEdition(Edition edition) async {
+  Future<void> insertEdition(Insertable<Edition> edition) async {
     await into(editions).insertOnConflictUpdate(edition);
   }
 
@@ -234,13 +266,14 @@ class AppDatabase extends _$AppDatabase {
     DateTime? finishedAt,
   }) async {
     // Find or create library entry
-    final entry = await (select(userLibraryEntries)
-          ..where((e) => e.workId.equals(workId)))
-        .getSingleOrNull();
+    final entry = await (select(
+      userLibraryEntries,
+    )..where((e) => e.workId.equals(workId))).getSingleOrNull();
 
     if (entry != null) {
-      await (update(userLibraryEntries)..where((e) => e.id.equals(entry.id)))
-          .write(
+      await (update(
+        userLibraryEntries,
+      )..where((e) => e.id.equals(entry.id))).write(
         UserLibraryEntriesCompanion(
           status: Value(status),
           startedAt: Value(startedAt),
@@ -269,13 +302,14 @@ class AppDatabase extends _$AppDatabase {
     required String workId,
     required int currentPage,
   }) async {
-    final entry = await (select(userLibraryEntries)
-          ..where((e) => e.workId.equals(workId)))
-        .getSingleOrNull();
+    final entry = await (select(
+      userLibraryEntries,
+    )..where((e) => e.workId.equals(workId))).getSingleOrNull();
 
     if (entry != null) {
-      await (update(userLibraryEntries)..where((e) => e.id.equals(entry.id)))
-          .write(
+      await (update(
+        userLibraryEntries,
+      )..where((e) => e.id.equals(entry.id))).write(
         UserLibraryEntriesCompanion(
           currentPage: Value(currentPage),
           updatedAt: Value(DateTime.now()),
@@ -289,13 +323,14 @@ class AppDatabase extends _$AppDatabase {
     required String workId,
     required int rating,
   }) async {
-    final entry = await (select(userLibraryEntries)
-          ..where((e) => e.workId.equals(workId)))
-        .getSingleOrNull();
+    final entry = await (select(
+      userLibraryEntries,
+    )..where((e) => e.workId.equals(workId))).getSingleOrNull();
 
     if (entry != null) {
-      await (update(userLibraryEntries)..where((e) => e.id.equals(entry.id)))
-          .write(
+      await (update(
+        userLibraryEntries,
+      )..where((e) => e.id.equals(entry.id))).write(
         UserLibraryEntriesCompanion(
           personalRating: Value(rating),
           updatedAt: Value(DateTime.now()),
@@ -309,13 +344,14 @@ class AppDatabase extends _$AppDatabase {
     required String workId,
     required String notes,
   }) async {
-    final entry = await (select(userLibraryEntries)
-          ..where((e) => e.workId.equals(workId)))
-        .getSingleOrNull();
+    final entry = await (select(
+      userLibraryEntries,
+    )..where((e) => e.workId.equals(workId))).getSingleOrNull();
 
     if (entry != null) {
-      await (update(userLibraryEntries)..where((e) => e.id.equals(entry.id)))
-          .write(
+      await (update(
+        userLibraryEntries,
+      )..where((e) => e.id.equals(entry.id))).write(
         UserLibraryEntriesCompanion(
           notes: Value(notes),
           updatedAt: Value(DateTime.now()),
@@ -327,6 +363,141 @@ class AppDatabase extends _$AppDatabase {
   // Delete work
   Future<void> deleteWork(String workId) async {
     await (delete(works)..where((w) => w.id.equals(workId))).go();
+  }
+
+  // Delete library entry (remove from library)
+  Future<void> deleteLibraryEntry(String workId) async {
+    await (delete(
+      userLibraryEntries,
+    )..where((e) => e.workId.equals(workId))).go();
+  }
+
+  // Statistics Queries
+  Future<int> countBooksByStatus(ReadingStatus status) async {
+    final count = userLibraryEntries.id.count();
+    final query = selectOnly(userLibraryEntries)..addColumns([count]);
+    query.where(userLibraryEntries.status.equals(status.index));
+    return await query.map((row) => row.read(count)).getSingle() ?? 0;
+  }
+
+  Future<int> countTotalPagesRead() async {
+    final readEntries = await (select(
+      userLibraryEntries,
+    )..where((e) => e.status.equals(ReadingStatus.read.index))).get();
+
+    int totalPages = 0;
+    for (final entry in readEntries) {
+      final edition =
+          await (select(editions)
+                ..where((e) => e.workId.equals(entry.workId))
+                ..limit(1))
+              .getSingleOrNull();
+      if (edition?.pageCount != null) {
+        totalPages += edition!.pageCount!;
+      }
+    }
+    return totalPages;
+  }
+
+  // Review Queue Queries
+  Future<List<DetectedItem>> getPendingReviewItems() async {
+    return (select(detectedItems)
+          ..where((t) => t.reviewStatus.equals('pending'))
+          ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]))
+        .get();
+  }
+
+  Future<void> rejectDetectedItem(String itemId) async {
+    await (update(detectedItems)..where((t) => t.id.equals(itemId))).write(
+      DetectedItemsCompanion(
+        reviewStatus: const Value('rejected'),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  Future<void> acceptDetectedItem({
+    required String itemId,
+    required String title,
+    required String author,
+    String? coverImage,
+  }) async {
+    return transaction(() async {
+      // 1. Create Work
+      final newWorkId = const uuid.Uuid().v4();
+      await insertWork(
+        WorksCompanion(
+          id: Value(newWorkId),
+          title: Value(title),
+          author: Value(author),
+          synthetic: const Value(true), // Mark as AI-created
+          createdAt: Value(DateTime.now()),
+          updatedAt: Value(DateTime.now()),
+        ),
+      );
+
+      // 2. Add to Library
+      await into(userLibraryEntries).insert(
+        UserLibraryEntriesCompanion.insert(
+          id: const uuid.Uuid().v4(),
+          workId: newWorkId,
+          status: ReadingStatus.toRead,
+          createdAt: Value(DateTime.now()),
+          updatedAt: Value(DateTime.now()),
+        ),
+      );
+
+      // 3. Update Detected Item
+      await (update(detectedItems)..where((t) => t.id.equals(itemId))).write(
+        DetectedItemsCompanion(
+          reviewStatus: const Value('accepted'),
+          workId: Value(newWorkId),
+          updatedAt: Value(DateTime.now()),
+        ),
+      );
+    });
+  }
+
+  // Debug: Seed items
+  Future<void> seedDebugItems() async {
+    final sessionId = const uuid.Uuid().v4();
+    await into(scanSessions).insert(
+      ScanSessionsCompanion.insert(
+        id: sessionId,
+        totalDetected: 2,
+        status: 'completed',
+        createdAt: Value(DateTime.now()),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+
+    await into(detectedItems).insert(
+      DetectedItemsCompanion.insert(
+        id: const uuid.Uuid().v4(),
+        sessionId: sessionId,
+        titleGuess: 'The Great Gatsby',
+        authorGuess: const Value('F. Scott Fitzgerald'),
+        confidence: 0.95,
+        imagePath: '/tmp/gatsby.jpg', // Placeholder
+        reviewStatus: 'pending',
+        createdAt: Value(DateTime.now()),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+
+    await into(detectedItems).insert(
+      DetectedItemsCompanion.insert(
+        id: const uuid.Uuid().v4(),
+        sessionId: sessionId,
+        titleGuess: 'Unknown Book',
+        authorGuess: const Value('Unknown Author'),
+        confidence: 0.45,
+        imagePath: '/tmp/unknown.jpg',
+        reviewStatus: 'pending',
+        createdAt: Value(DateTime.now()),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
   }
 }
 
@@ -366,10 +537,10 @@ class WorkWithLibraryStatus {
   }
 }
 
-LazyDatabase _openConnection() {
-  return LazyDatabase(() async {
-    final dbFolder = await getApplicationDocumentsDirectory();
-    final file = File(p.join(dbFolder.path, 'bookstrack.sqlite'));
-    return NativeDatabase(file);
-  });
+/// Opens a connection to the database.
+/// For web platforms, uses IndexedDB via sqlite3_web.
+/// For native platforms (iOS, Android, macOS), uses NativeDatabase with file storage.
+QueryExecutor _openConnection() {
+  // For web platforms, use IndexedDB-backed database
+  return WebDatabase('bookstrack_db', logStatements: false);
 }
