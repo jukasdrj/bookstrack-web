@@ -6,8 +6,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **BooksTrack Flutter** is a cross-platform book tracking application converted from iOS. The app features AI-powered bookshelf scanning using Gemini 2.0 Flash, multi-mode search, and reading analytics with diversity insights.
 
-**Current Status:** Phase 2 (Search Feature) - 100% UI Complete, API Integration Pending (as of Jan 5, 2026)
-**Latest Achievement:** Master TODO list created and documentation reorganized
+**Current Status:** ✅ Phase 2 Complete - Production Web App Deployed (as of Jan 17, 2026)
+**Latest Achievement:** Production-ready web build deployed to Cloudflare Pages with full BendV3 API integration
+**Live URL:** https://books.oooefam.net
 
 **Key Differentiator:** Platform-agnostic Cloudflare Workers backend means zero API changes during iOS → Flutter conversion.
 
@@ -18,19 +19,21 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Technology Stack
 
 ### Frontend
-- **Framework:** Flutter 3.x (iOS + Android + Web)
-- **State Management:** flutter_riverpod (^2.4.0) with code generation (@riverpod)
-- **Database:** Drift (^2.14.0) - type-safe reactive SQL ORM
-- **Networking:** Dio (^5.4.0) with dio_cache_interceptor
-- **Navigation:** go_router (^12.0.0) with StatefulShellRoute
-- **Image Caching:** cached_network_image (^3.3.0)
-- **Camera/Barcode:** camera (^0.11.0) + mobile_scanner (^4.0.0)
-- **Firebase:** Auth, Firestore, Storage, Analytics, Crashlytics
+- **Framework:** Flutter 3.38.7 (iOS + Android + Web)
+- **State Management:** flutter_riverpod (^3.1.0) with code generation (@riverpod 4.0)
+- **Database:** Drift (^2.30.1) - type-safe reactive SQL ORM (Web: IndexedDB, Native: SQLite)
+- **Networking:** Dio (^5.7.0) with dio_cache_interceptor (^4.0.5)
+- **Navigation:** go_router (^17.0.1) with StatefulShellRoute
+- **Image Caching:** cached_network_image (^3.4.1)
+- **Camera/Barcode:** camera (^0.11.0) + mobile_scanner (^7.1.4)
+- **Firebase:** Auth (6.1.3), Firestore (6.1.1), Storage (13.0.5), Analytics (12.1.0), Crashlytics (5.0.6)
 
 ### Backend
-- **Platform:** Cloudflare Workers (TypeScript)
+- **Platform:** Cloudflare Workers (TypeScript) + Cloudflare Pages
+- **API:** BendV3 v3.2.0 at https://api.oooefam.net
+- **Datastore:** Alexandria v2.8.0 (D1 Database - 49M+ ISBNs)
 - **AI:** Google Gemini 2.0 Flash (vision + text)
-- **APIs:** Google Books API, Open Library API
+- **Web Deployment:** Cloudflare Pages at https://books.oooefam.net
 
 ### Design System
 - **Material Design 3** with seed color #1976D2 (Blue 700)
@@ -107,9 +110,18 @@ flutter build appbundle --release
 # macOS build (currently blocked by gRPC issue)
 flutter build macos --release
 
-# Web build
+# Web build (Production)
 flutter build web --release
+
+# Deploy to Cloudflare Pages
+npx wrangler pages deploy build/web --project-name=bookstrack-web --branch=main
 ```
+
+**Live Deployment:**
+- **Production:** https://books.oooefam.net
+- **Preview:** https://bookstrack-web.pages.dev
+- **Auto-Deploy:** Enabled (GitHub main branch → Cloudflare Pages)
+- **Custom Domain:** books.oooefam.net (CNAME to bookstrack-web.pages.dev)
 
 ### Maintenance
 ```bash
@@ -734,6 +746,30 @@ All documentation has been organized into the `docs/` directory by category:
 3. ✅ **State Management** - Complete Riverpod integration with reactive providers
 4. ✅ **Error Handling** - Comprehensive API exception handling and user feedback
 5. ✅ **Responsive UI** - Loading, empty, and error states with retry functionality
+
+### Production Web Deployment (January 17, 2026)
+**Status:** ✅ LIVE IN PRODUCTION
+
+**Major Updates:**
+1. ✅ **Package Updates** - All 13 major packages updated (Riverpod 4.0, Firebase 6.x, go_router 17.0)
+2. ✅ **Web Platform Support** - Fixed Drift database for web (IndexedDB instead of FFI)
+3. ✅ **BendV3 API Integration** - Fully connected to production API (https://api.oooefam.net)
+4. ✅ **Cloudflare Pages Deployment** - Live at https://books.oooefam.net
+5. ✅ **BookDTO Parsing** - Handles enriched author data from Alexandria
+6. ✅ **Production Build** - Optimized 2.9 MB bundle (99.3% icon tree-shaking)
+
+**Live Features:**
+- Real-time book search (49M+ ISBNs via Alexandria)
+- ISBN lookup with validation
+- Cover image loading from Alexandria CDN
+- Error handling and retry logic
+- Mobile-responsive Material Design 3 UI
+
+**Deployment:**
+- **Custom Domain:** books.oooefam.net
+- **Auto-Deploy:** GitHub main branch → Cloudflare Pages
+- **Preview Deployments:** Every commit gets unique URL
+- **Integration:** Same Cloudflare account as BendV3 API worker
 
 **Technical Implementation:**
 - **Search State Model** - Freezed models with 5 distinct states (initial, loading, results, empty, error)
