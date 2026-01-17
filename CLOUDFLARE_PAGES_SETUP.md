@@ -188,7 +188,7 @@ cd /Users/juju/dev_repos/bookstrack-web
 flutter build web --release
 
 # Deploy to Cloudflare Pages
-npx wrangler pages deploy build/web \
+wrangler pages deploy build/web \
   --project-name=bookstrack-web \
   --branch=main
 ```
@@ -196,7 +196,7 @@ npx wrangler pages deploy build/web \
 ### Configure Custom Domain (CLI)
 
 ```bash
-npx wrangler pages deployment create \
+wrangler pages deployment create \
   --project-name=bookstrack-web \
   --branch=main \
   --commit-hash=$(git rev-parse HEAD)
@@ -497,10 +497,10 @@ open http://localhost:8080
 **Wrangler Deploy:**
 ```bash
 # One-time deploy
-npx wrangler pages deploy build/web --project-name=bookstrack-web
+wrangler pages deploy build/web --project-name=bookstrack-web
 
 # Watch deployments
-npx wrangler pages deployment list --project-name=bookstrack-web
+wrangler pages deployment list --project-name=bookstrack-web
 ```
 
 ---

@@ -313,15 +313,15 @@ Tabs:
 **Wrangler CLI:**
 ```bash
 # List recent deployments
-npx wrangler pages deployment list --project-name=bookstrack-web
+wrangler pages deployment list --project-name=bookstrack-web
 
 # View deployment details
-npx wrangler pages deployment get <deployment-id>
+wrangler pages deployment get <deployment-id>
 ```
 
 **Combined with BendV3 Monitoring:**
 - Harvest Dashboard: https://harvest.oooefam.net (API metrics)
-- Worker Logs: `npx wrangler tail --remote` (in bendv3 repo)
+- Worker Logs: `wrangler tail --remote` (in bendv3 repo)
 - End-to-end request tracing available
 
 ---
@@ -434,14 +434,14 @@ npx wrangler pages deployment get <deployment-id>
 # Build web version
 flutter build web --release
 
-# Deploy to Cloudflare Pages
-npx wrangler pages deploy build/web --project-name=bookstrack-web --branch=main
+# Deploy to Cloudflare Pages (wrangler 4.59.2)
+wrangler pages deploy build/web --project-name=bookstrack-web --branch=main
 
 # List deployments
-npx wrangler pages deployment list --project-name=bookstrack-web
+wrangler pages deployment list --project-name=bookstrack-web
 
 # Check logs
-npx wrangler pages deployment logs <deployment-id>
+wrangler pages deployment logs <deployment-id>
 ```
 
 ### Support

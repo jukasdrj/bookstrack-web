@@ -113,8 +113,11 @@ flutter build macos --release
 # Web build (Production)
 flutter build web --release
 
-# Deploy to Cloudflare Pages
-npx wrangler pages deploy build/web --project-name=bookstrack-web --branch=main
+# Deploy to Cloudflare Pages (wrangler 4.59.2+)
+wrangler pages deploy build/web --project-name=bookstrack-web --branch=main
+
+# Alternative: Use wrapper script (ensures latest version)
+./.cloudflare/wrangler-wrapper.sh pages deploy build/web --project-name=bookstrack-web
 ```
 
 **Live Deployment:**
@@ -122,6 +125,7 @@ npx wrangler pages deploy build/web --project-name=bookstrack-web --branch=main
 - **Preview:** https://bookstrack-web.pages.dev
 - **Auto-Deploy:** Enabled (GitHub main branch → Cloudflare Pages)
 - **Custom Domain:** books.oooefam.net (CNAME to bookstrack-web.pages.dev)
+- **Wrangler Version:** 4.59.2 (latest)
 
 ### Maintenance
 ```bash
