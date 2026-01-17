@@ -41,9 +41,39 @@ class SearchService {
   /// Search books by author using BendV3 unified search.
   ///
   /// **Note:** BendV3 doesn't have a dedicated author search mode,
-  /// so this uses the same text search as searchByTitle.
-  Future<ResponseEnvelope<SearchResultData>> searchByAuthor(String query) async {
-    return searchByTitle(query); // BendV3 uses unified search
+  /// so this uses unified text search and then filters results client-side
+  /// to only include books where the author name matches the query.
+  Future<ResponseEnvelope<SearchResultData>> searchByAuthor(
+    String query,
+  ) async {
+    try {
+      final response = await _bendV3.searchBooks(query: query);
+
+      // Filter results to only books where author name contains the query
+      final queryLower = query.toLowerCase();
+      final filteredBooks = response.results.where((book) {
+        return book.authors.any((author) =>
+            author.toLowerCase().contains(queryLower));
+      }).toList();
+
+      return ResponseEnvelope(
+        success: true,
+        data: SearchResultData(
+          books: filteredBooks,
+          total: filteredBooks.length,
+          limit: response.limit,
+          offset: response.offset,
+        ),
+        meta: ResponseMeta(cached: false),
+      );
+    } on DioException {
+      rethrow;
+    } catch (e) {
+      return ResponseEnvelope(
+        success: false,
+        meta: ResponseMeta(cached: false),
+      );
+    }
   }
 
   /// Search book by ISBN using BendV3 direct ISBN lookup.
@@ -55,24 +85,14 @@ class SearchService {
         // Book not found
         return ResponseEnvelope<SearchResultData>(
           success: true,
-          data: SearchResultData(
-            books: [],
-            total: 0,
-            limit: 1,
-            offset: 0,
-          ),
+          data: SearchResultData(books: [], total: 0, limit: 1, offset: 0),
           meta: ResponseMeta(cached: false),
         );
       }
 
       return ResponseEnvelope<SearchResultData>(
         success: true,
-        data: SearchResultData(
-          books: [book],
-          total: 1,
-          limit: 1,
-          offset: 0,
-        ),
+        data: SearchResultData(books: [book], total: 1, limit: 1, offset: 0),
         meta: ResponseMeta(cached: false),
       );
     } on DioException catch (e) {
@@ -80,12 +100,7 @@ class SearchService {
         // Book not found - return empty results
         return ResponseEnvelope<SearchResultData>(
           success: true,
-          data: SearchResultData(
-            books: [],
-            total: 0,
-            limit: 1,
-            offset: 0,
-          ),
+          data: SearchResultData(books: [], total: 0, limit: 1, offset: 0),
           meta: ResponseMeta(cached: false),
         );
       }
@@ -168,11 +183,7 @@ class ResponseEnvelope<T> {
   final T? data;
   final ResponseMeta meta;
 
-  ResponseEnvelope({
-    required this.success,
-    this.data,
-    required this.meta,
-  });
+  ResponseEnvelope({required this.success, this.data, required this.meta});
 }
 
 /// Response metadata.

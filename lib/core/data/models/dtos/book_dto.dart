@@ -160,6 +160,9 @@ sealed class BookDTO with _$BookDTO {
 @freezed
 sealed class CoverUrls with _$CoverUrls {
   const factory CoverUrls({
+    /// Original/source cover image (highest quality)
+    String? original,
+
     /// Large cover image (~600px width)
     String? large,
 
