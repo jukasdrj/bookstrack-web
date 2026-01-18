@@ -106,11 +106,19 @@ class BookGridCard extends StatelessWidget {
   Widget _buildStatusDot(ColorScheme colorScheme) {
     final status = bookData.status;
     final statusColor = status != null ? _getStatusColor(status) : Colors.grey;
+    final statusLabel =
+        status != null ? _getStatusLabel(status) : 'Unknown status';
 
-    return Container(
-      width: 8,
-      height: 8,
-      decoration: BoxDecoration(color: statusColor, shape: BoxShape.circle),
+    return Tooltip(
+      message: statusLabel,
+      child: Semantics(
+        label: statusLabel,
+        child: Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(color: statusColor, shape: BoxShape.circle),
+        ),
+      ),
     );
   }
 
@@ -138,6 +146,15 @@ class BookGridCard extends StatelessWidget {
       ReadingStatus.toRead => Colors.blue,
       ReadingStatus.reading => Colors.orange,
       ReadingStatus.read => Colors.green,
+    };
+  }
+
+  String _getStatusLabel(ReadingStatus status) {
+    return switch (status) {
+      ReadingStatus.wishlist => 'Wishlist',
+      ReadingStatus.toRead => 'To Read',
+      ReadingStatus.reading => 'Reading',
+      ReadingStatus.read => 'Read',
     };
   }
 }
