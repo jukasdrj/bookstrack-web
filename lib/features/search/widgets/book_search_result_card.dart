@@ -145,17 +145,10 @@ class BookSearchResultCard extends StatelessWidget {
               imageUrl: coverUrl,
               fit: BoxFit.cover,
               memCacheWidth: 120, // 60 * 2 for 2x displays
-              memCacheHeight: 160, // 80 * 2
-              placeholder: (context, url) => Container(
-                color: colorScheme.surfaceContainerHighest,
-                child: const Center(
-                  child: SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-                ),
-              ),
+              // PERFORMANCE: Remove memCacheHeight to preserve aspect ratio and avoid unnecessary resizing
+              // PERFORMANCE: Use static container instead of spinner to prevent jank during scroll
+              placeholder: (context, url) =>
+                  Container(color: colorScheme.surfaceContainerHighest),
               errorWidget: (context, url, error) =>
                   _buildPlaceholder(colorScheme),
             )
