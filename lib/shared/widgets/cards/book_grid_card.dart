@@ -84,11 +84,9 @@ class BookGridCard extends StatelessWidget {
               imageUrl: coverUrl,
               fit: BoxFit.cover,
               memCacheWidth: 600, // Adaptive for grid (larger)
+              // Optimization: Use static placeholder to avoid animation overhead during scroll
               placeholder: (context, url) => Container(
                 color: colorScheme.surfaceContainerHighest,
-                child: const Center(
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
               ),
               errorWidget: (context, url, error) =>
                   _buildPlaceholder(colorScheme),
