@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:books_tracker/core/data/database/database.dart';
+import 'package:books_tracker/shared/extensions/reading_status_extensions.dart';
 
 /// A compact grid card widget for displaying books in grid view
 class BookGridCard extends StatelessWidget {
@@ -106,11 +107,18 @@ class BookGridCard extends StatelessWidget {
   Widget _buildStatusDot(ColorScheme colorScheme) {
     final status = bookData.status;
     final statusColor = status != null ? _getStatusColor(status) : Colors.grey;
+    final statusLabel = status?.label ?? 'Unknown Status';
 
-    return Container(
-      width: 8,
-      height: 8,
-      decoration: BoxDecoration(color: statusColor, shape: BoxShape.circle),
+    return Tooltip(
+      message: statusLabel,
+      child: Semantics(
+        label: 'Status: $statusLabel',
+        child: Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(color: statusColor, shape: BoxShape.circle),
+        ),
+      ),
     );
   }
 
