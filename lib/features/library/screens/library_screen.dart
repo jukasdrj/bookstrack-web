@@ -1,3 +1,5 @@
+import 'dart:async'; // Bolt: Added for debouncing
+
 import 'package:books_tracker/core/data/database/database.dart';
 import 'package:books_tracker/shared/widgets/cards/book_card.dart';
 import 'package:books_tracker/shared/widgets/cards/book_grid_card.dart';
@@ -18,6 +20,13 @@ class LibraryScreen extends ConsumerStatefulWidget {
 class _LibraryScreenState extends ConsumerState<LibraryScreen> {
   bool _isGridView = false;
   bool _isSearching = false;
+  Timer? _debounce; // Bolt: Timer for debouncing search input
+
+  @override
+  void dispose() {
+    _debounce?.cancel(); // Bolt: Clean up timer
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +44,11 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                   border: InputBorder.none,
                 ),
                 onChanged: (value) {
-                  ref.read(librarySearchQueryProvider.notifier).setQuery(value);
+                  // Bolt: Debounce search input to prevent excessive DB queries
+                  if (_debounce?.isActive ?? false) _debounce!.cancel();
+                  _debounce = Timer(const Duration(milliseconds: 500), () {
+                    ref.read(librarySearchQueryProvider.notifier).setQuery(value);
+                  });
                 },
               )
             : const Text('Library'),
