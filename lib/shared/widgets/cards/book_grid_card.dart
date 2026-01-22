@@ -106,30 +106,51 @@ class BookGridCard extends StatelessWidget {
   Widget _buildStatusDot(ColorScheme colorScheme) {
     final status = bookData.status;
     final statusColor = status != null ? _getStatusColor(status) : Colors.grey;
+    final statusLabel = _getStatusLabel(status);
 
-    return Container(
-      width: 8,
-      height: 8,
-      decoration: BoxDecoration(color: statusColor, shape: BoxShape.circle),
+    return Tooltip(
+      message: statusLabel,
+      child: Semantics(
+        label: 'Status: $statusLabel',
+        image: true,
+        child: Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(color: statusColor, shape: BoxShape.circle),
+        ),
+      ),
     );
   }
 
   Widget _buildCompactRating(ThemeData theme) {
     final rating = bookData.libraryEntry?.personalRating ?? 0;
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(Icons.star, size: 12, color: theme.colorScheme.primary),
-        const SizedBox(width: 2),
-        Text(
-          rating.toString(),
-          style: theme.textTheme.bodySmall?.copyWith(
-            fontWeight: FontWeight.w600,
+    return Semantics(
+      label: 'Rated $rating out of 5 stars',
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.star, size: 12, color: theme.colorScheme.primary),
+          const SizedBox(width: 2),
+          Text(
+            rating.toString(),
+            style: theme.textTheme.bodySmall?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
+  }
+
+  String _getStatusLabel(ReadingStatus? status) {
+    if (status == null) return 'Unknown status';
+    return switch (status) {
+      ReadingStatus.wishlist => 'Wishlist',
+      ReadingStatus.toRead => 'To Read',
+      ReadingStatus.reading => 'Reading',
+      ReadingStatus.read => 'Read',
+    };
   }
 
   Color _getStatusColor(ReadingStatus status) {
